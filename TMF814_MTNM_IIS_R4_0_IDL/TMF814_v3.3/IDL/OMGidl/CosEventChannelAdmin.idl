@@ -1,0 +1,156 @@
+#ifndef COS_EVENTCHANNELADMIN_IDL
+#define COS_EVENTCHANNELADMIN_IDL
+
+#include "CosEventComm.idl"
+
+/**
+ * CORBA Common Object Services: Event Service.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.0
+ */
+
+#pragma prefix "omg.org"
+
+module CosEventChannelAdmin
+{
+   /**
+    * Exception indicating that a supplier or consumer is already
+    * connected.
+    */
+   exception AlreadyConnected {};
+
+   /**
+    * Exception indicating that a supplier or consumer has
+    * incorrect type.
+    */
+   exception TypeError {};
+
+   /**
+    * Interface for a proxy push consumer.
+    */
+   interface ProxyPushConsumer: CosEventComm::PushConsumer
+   {
+      /**
+       * Connect a push supplier to this proxy.
+       * @parm <code>push_supplier</code> - The <code>PushSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       */
+      void connect_push_supplier(in CosEventComm::PushSupplier push_supplier)
+	 raises(AlreadyConnected);
+   };
+
+   /**
+    * Interface for a proxy pull supplier.
+    */
+   interface ProxyPullSupplier: CosEventComm::PullSupplier 
+   {
+      /**
+       * Connect a pull consumer to this proxy.
+       * @parm <code>pull_consumer</code> - The <code>PullConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       */
+      void connect_pull_consumer(in CosEventComm::PullConsumer pull_consumer)
+	 raises(AlreadyConnected);
+   };
+
+   /**
+    * Interface for a proxy pull consumer.
+    */
+   interface ProxyPullConsumer: CosEventComm::PullConsumer 
+   {
+      /**
+       * Connect a pull supplier to this proxy.
+       * @parm <code>pull_supplier</code> - The <code>PullSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       * @raises TypeError Illegal supplier type.
+       */
+      void connect_pull_supplier(in CosEventComm::PullSupplier pull_supplier)
+	 raises(AlreadyConnected,TypeError);
+   };
+
+   /**
+    * Interface for a proxy push supplier.
+    */
+   interface ProxyPushSupplier: CosEventComm::PushSupplier 
+   {
+      /**
+       * Connect a push consumer to this proxy.
+       * @parm <code>push_consumer</code> - The <code>PushConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       * @raises TypeError Illegal consumer type.
+       */
+      void connect_push_consumer(in CosEventComm::PushConsumer push_consumer)
+	 raises(AlreadyConnected, TypeError);
+   };
+   
+   /**
+    * Interface for the consumer administration object.
+    */
+   interface ConsumerAdmin 
+   {
+      /**
+       * Obtain a push supplier proxy for this administration object.
+       * @returns A <code>ProxyPushSupplier</code> object reference.
+       */
+      ProxyPushSupplier obtain_push_supplier();
+
+      /**
+       * Obtain a pull supplier proxy for this administration object.
+       * @returns A <code>ProxyPullSupplier</code> object reference.
+       */
+      ProxyPullSupplier obtain_pull_supplier();
+   };
+   
+   /**
+    * Interface for the supplier administration object.
+    */
+   interface SupplierAdmin
+   {
+      /**
+       * Obtain a push consumer proxy for this administration object.
+       * @returns A <code>ProxyPushConsumer</code> object reference.
+       */
+      ProxyPushConsumer obtain_push_consumer();
+
+      /**
+       * Obtain a pull consumer proxy for this administration object.
+       * @returns A <code>ProxyPullConsumer</code> object reference.
+       */
+      ProxyPullConsumer obtain_pull_consumer();
+   };
+
+   /**
+    * Interface for the event channel.
+    */
+   interface EventChannel
+   {
+      /**
+       * Gets an object reference to the administration object
+       * for event consumers.
+       * @returns The <code>ConsumerAdmin</code> object reference.
+       */
+      ConsumerAdmin for_consumers();
+
+      /**
+       * Gets an object reference to the administration object
+       * for event suppliers.
+       * @returns The <code>SupplierAdmin</code> object reference.
+       */
+      SupplierAdmin for_suppliers();
+
+      /**
+       * Destroys this event channel and released any storage used.
+       */
+      void destroy();
+   };
+};
+
+#endif /* COS_EVENTCHANNELADMIN_IDL */

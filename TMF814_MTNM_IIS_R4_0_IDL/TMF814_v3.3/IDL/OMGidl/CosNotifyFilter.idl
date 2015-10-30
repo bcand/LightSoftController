@@ -1,0 +1,503 @@
+#ifndef COSNOTIFYFILTER_IDL
+#define COSNOTIFYFILTER_IDL
+
+/**
+ * CORBA Common Object Services: Notification Service.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.0.1
+ */
+
+#include "CosNotification.idl"
+#include "CosNotifyComm.idl"
+
+#include "orb.idl"
+
+#ifdef ORBIX
+#include "orb.idl"
+#endif
+
+#ifdef ORBIX2K
+#include "orb.idl"
+#endif
+
+#pragma prefix "omg.org"
+
+module CosNotifyFilter
+{
+   /**
+    * A unique identifier used to identify filter constraints.
+    */
+   typedef long ConstraintID;
+
+   /**
+    * Definition of a constraint. It is a two-tuple of a sequence of event
+    * types and a constraint expression.
+    */
+   struct ConstraintExp
+   {
+      CosNotification::EventTypeSeq event_types;
+      string constraint_expr;
+   };
+
+   /**
+    * A sequence of <code>ConstraintID</code>.
+    */
+   typedef sequence<ConstraintID> ConstraintIDSeq;
+
+   /**
+    * A sequence of <code>ConstraintExp</code> structures.
+    */
+   typedef sequence<ConstraintExp> ConstraintExpSeq;
+
+   /**
+    * Structure used when an ID has been assigned to a constraint expression.
+    */
+   struct ConstraintInfo
+   {
+      ConstraintExp constraint_expression;
+      ConstraintID constraint_id;
+   };
+
+   /**
+    * A sequence of <code>ConstraintInfo</code> structures.
+    */
+   typedef sequence<ConstraintInfo> ConstraintInfoSeq;
+
+   /**
+    * Definition of a mapping constraint. It is a two-tuple of a
+    * constraint expression and a value to set.
+    */
+   struct MappingConstraintPair
+   {
+      ConstraintExp constraint_expression;
+      any result_to_set;
+   };
+
+   /**
+    * A sequence of <code>MappingConstraintPair</code> structures.
+    */
+   typedef sequence<MappingConstraintPair> MappingConstraintPairSeq;
+
+   /**
+    * Structure used when an ID has been assigned to a mapping
+    * constraint expression.
+    */
+   struct MappingConstraintInfo
+   {
+      ConstraintExp constraint_expression;
+      ConstraintID constraint_id;
+      any value;
+   };
+
+   /**
+    * A sequence of <code>MappingConstraintInfo</code> structures.
+    */
+   typedef sequence<MappingConstraintInfo> MappingConstraintInfoSeq;
+
+   /**
+    * A unique identifier used to identify callback objects.
+    */
+   typedef long CallbackID;
+
+   /**
+    * A sequence of <code>CallbackID</code>.
+    */
+   typedef sequence<CallbackID> CallbackIDSeq;
+
+   /**
+    * Exception used to that an event contains data which is not filterable.
+    */
+   exception UnsupportedFilterableData {};
+
+   /**
+    * Exception used to indicate invalid grammer.
+    */
+   exception InvalidGrammar {};
+
+   /**
+    * Exception used to indicate invalid filter constraint.
+    */
+   exception InvalidConstraint {ConstraintExp constr;};
+
+   /**
+    * Exception used to indicate a duplicate constraint ID.
+    */
+   exception DuplicateConstraintID {ConstraintID id;};
+
+   /**
+    * Exception used to indicate a that a constraint was not found.
+    */
+   exception ConstraintNotFound {ConstraintID id;};
+
+   /**
+    * Exception used to indicate a that a callback object was not found.
+    */
+   exception CallbackNotFound {};
+
+   /**
+    * Exception used to indicate a that a constraint value is invalid.
+    */
+   exception InvalidValue {ConstraintExp constr; any value;};
+
+   /**
+    * Interface for a filter.
+    */
+   interface Filter
+   {
+      /**
+       * The constraint grammer used by this filter.
+       */
+      readonly attribute string constraint_grammar;
+
+      /**
+       * Associates one or more constraints with this filter object.
+       * @parm <code>constraint_list</code> - List of constraints to be
+       * associated with filter.
+       * @returns A list with ID for each of the added constraints.
+       * @raises InvalidConstraint If any of the constraints are invalid.
+       */
+      ConstraintInfoSeq add_constraints (
+	 in ConstraintExpSeq constraint_list)
+	 raises (InvalidConstraint);
+
+      /**
+       * Delete or modify constraints on this filter object.
+       * @parm <code>del_list</code> - List of constraints to delete.
+       * @parm <code>modify_list</code> - List of constraints to modify.
+       * @raises InvalidConstraint If any of the constraints in the
+       * <code>modify_list</code> input sequences are invalid.
+       * @raises ConstraintNotFound If a constraint in either
+       * of the two input sequences was not found.
+       */
+      void modify_constraints (
+	 in ConstraintIDSeq del_list,
+	 in ConstraintInfoSeq modify_list)
+	 raises (InvalidConstraint, ConstraintNotFound);
+
+      /**
+       * Return a list of constraints for this filter object based on IDs.
+       * @parm <code>id_list</code> - List of constraint IDs.
+       * @returns A list of constraints for the IDs in the input sequence.
+       * @raises ConstraintNotFound If a constraint was not found.
+       */
+      ConstraintInfoSeq get_constraints(
+	 in ConstraintIDSeq id_list)
+	 raises (ConstraintNotFound);
+
+      /**
+       * Return a list of all constraints for this filter object.
+       * @returns A list of all constraints.
+       */
+      ConstraintInfoSeq get_all_constraints();
+
+      /**
+       * Removes all constraints defined on this filter object.
+       */
+      void remove_all_constraints();
+
+      /**
+       * Destroys this filter object.
+       */
+      void destroy();
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The event to evaluate.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match ( in any filterable_data )
+	 raises (UnsupportedFilterableData);
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The structured event to evaluate.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match_structured (
+	 in CosNotification::StructuredEvent filterable_data )
+	 raises (UnsupportedFilterableData);
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The typed event to evaluate.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match_typed (
+	 in CosNotification::PropertySeq filterable_data )
+	 raises (UnsupportedFilterableData);
+
+      /**
+       * Attach a callback object to this filter that will be notified
+       * each time the constraints on this filter are modified.
+       * @parm <code>callback</code> - A callback object reference of type
+       * NotifySubscribe.
+       * @returns A ID which is unique for the newly attached object.
+       */
+      CallbackID attach_callback (
+	 in CosNotifyComm::NotifySubscribe callback);
+
+      /**
+       * Detach a callback object from this filter.
+       * @parm <code>callback</code> - ID of the callback object to detach.
+       * @raises CallbackNotFound If the ID does not correspond to any
+       * attached callback object reference.
+       */
+      void detach_callback ( in CallbackID callback)
+	 raises ( CallbackNotFound );
+
+      /**
+       * Returns a list of callback objects attached to this filter.
+       * @returns List of callback object IDs.
+       */
+      CallbackIDSeq get_callbacks();
+
+   }; // Filter
+
+   /**
+    * Interface for a mapping filter.
+    */
+   interface MappingFilter
+   {
+      /**
+       * The constraint grammer used by this filter.
+       */
+      readonly attribute string constraint_grammar;
+
+      /**
+       * The data type of the property value that this filter was designed
+       * to affect.
+       */
+      readonly attribute CORBA::TypeCode value_type;
+      /**
+       * The output value for any match operation that returns true.
+       */
+      readonly attribute any default_value;
+
+      /**
+       * Associates one or more mapping constraints with this filter object.
+       * @parm <code>constraint_list</code> - List of mapping constraints to
+       * be associated with filter.
+       * @returns A list with ID for each of the added mapping constraints.
+       * @raises InvalidConstraint If any of the mapping constraints
+       * are invalid.
+       * @raises InvalidValue If any of the constraints have a typecode
+       * that is different from the <code>value_type</code> attribute.
+       */
+      MappingConstraintInfoSeq add_mapping_constraints (
+	 in MappingConstraintPairSeq pair_list)
+	 raises (InvalidConstraint, InvalidValue);
+
+      /**
+       * Delete or modify mapping constraints on this filter object.
+       * @parm <code>del_list</code> - List of mapping constraints to delete.
+       * @parm <code>modify_list</code> - List of constraints to modify.
+       * @raises InvalidConstraint If any of the constraints in the
+       * modify_list input sequences are invalid.
+       * @raises InvalidValue If any of the constraints have a typecode
+       * that is different from the <code>value_type</code> attribute.
+       * @raises ConstraintNotFound If a constraint in either
+       * of the two input sequences was not found.
+       */
+      void modify_mapping_constraints (
+	 in ConstraintIDSeq del_list,
+	 in MappingConstraintInfoSeq modify_list)
+	 raises (InvalidConstraint, InvalidValue,
+		 ConstraintNotFound);
+
+      /**
+       * Return a list of mapping constraints for this filter object
+       * based on IDs.
+       * @parm <code>id_list</code> - List of mapping constraint IDs.
+       * @returns A list of mapping constraints for the IDs in the
+       * input sequence.
+       * @raises ConstraintNotFound If a mapping constraint was not found.
+       */
+      MappingConstraintInfoSeq get_mapping_constraints (
+	 in ConstraintIDSeq id_list)
+	 raises (ConstraintNotFound);
+
+      /**
+       * Return a list of all mapping constraints for this filter object.
+       * @returns A list of all mapping constraints.
+       */
+      MappingConstraintInfoSeq get_all_mapping_constraints();
+
+      /**
+       * Removes all mapping constraints defined on this filter object.
+       */
+      void remove_all_mapping_constraints();
+
+      /**
+       * Destroys this mapping filter object.
+       */
+      void destroy();
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The event to evaluate.
+       * @parm <code>result_to_set</code> - Value of a constraint that
+       * matches the event or <code>default_value</code> if the event
+       * does not match any constraints.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match ( in any filterable_data,
+		      out any result_to_set )
+	 raises (UnsupportedFilterableData);
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The structured event to evaluate.
+       * @parm <code>result_to_set</code> - Value of a constraint that
+       * matches the event or <code>default_value</code> if the event
+       * does not match any constraints.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match_structured (
+	 in CosNotification::StructuredEvent filterable_data,
+	 out any result_to_set)
+	 raises (UnsupportedFilterableData);
+
+      /**
+       * Evaluates the input event against the filter constraints defined
+       * on this filter object. If the event satisfies one of the filter
+       * constraints TRUE is returned, otherwise FALSE is returned.
+       * @parm <code>filterable_data</code> - The typed event to evaluate.
+       * @parm <code>result_to_set</code> - Value of a constraint that
+       * matches the event or default_value if the event does not match
+       * any constraints.
+       * @returns TRUE if event matches any constraint, FALSE otherwise.
+       * raises UnsupportedFilterableData If the event specified by
+       * <code>filterable_data</code> contains data that this filter is
+       * not designed to handle.
+       */
+      boolean match_typed (
+	 in CosNotification::PropertySeq filterable_data,
+	 out any result_to_set)
+	 raises (UnsupportedFilterableData);
+
+   }; // MappingFilter
+
+   /**
+    * Interface for a filter factory.
+    */
+   interface FilterFactory
+   {
+      /**
+       * Create a filter with the specified grammer.
+       * @parm <code>constraint_grammar</code> - The constraint grammer to
+       * be used by the filter.
+       * @returns A filter object reference.
+       * @raises InvalidGrammar If the specified grammer is not supported.
+       */
+      Filter create_filter (
+	 in string constraint_grammar)
+	 raises (InvalidGrammar);
+
+      /**
+       * Create a mapping filter with the specified grammer.
+       * @parm <code>constraint_grammar</code> - The constraint grammer to
+       * be used by the filter.
+       * @parm <code>default_value</code> - The default value to be returned
+       * by match operations invoked on the mapping filter if no match is
+       * found.
+       * @returns A mapping filter object reference.
+       * @raises InvalidGrammar If the specified grammer is not supported.
+       */
+      MappingFilter create_mapping_filter (
+	 in string constraint_grammar,
+	 in any default_value)
+	 raises(InvalidGrammar);
+
+   }; // FilterFactory
+
+   /**
+    * A unique identifier used to identify filters.
+    */
+   typedef long FilterID;
+
+   /**
+    * A sequence of FilterID.
+    */
+   typedef sequence<FilterID> FilterIDSeq;
+
+   /**
+    * Exception used when a filter could not be found.
+    */
+   exception FilterNotFound {};
+
+   /**
+    * Interface for filter administrators.
+    */
+   interface FilterAdmin
+   {
+      /**
+       * Add a filter to this object's list of filters. All these filters
+       * are tried upon reception of an event.
+       * @parm <code>new_filter</code> - The filter to add.
+       * @returns An unique ID that identifies the added filter.
+       */
+      FilterID add_filter ( in Filter new_filter );
+
+      /**
+       * Remove a filter from this object's list of filters.
+       * @parm <code>filter</code> - The filter ID.
+       * @raises FilterNotFound If the ID does not correspond to any
+       * filter that has been added to this object.
+       */
+      void remove_filter ( in FilterID filter )
+	 raises ( FilterNotFound );
+
+      /**
+       * Get a filter from the filter ID.
+       * @parm <code>filter</code> - The filter ID.
+       * @raises FilterNotFound If the ID does not correspond to any
+       * filter that has been added to this object.
+       */
+      Filter get_filter ( in FilterID filter )
+	 raises ( FilterNotFound );
+
+      /**
+       * Get all filters added to this administration object.
+       * @returns A sequence of filter IDs.
+       */
+      FilterIDSeq get_all_filters();
+
+      /**
+       * Remove all filters added to this administration object.
+       */
+      void remove_all_filters();
+
+   }; // FilterAdmin
+
+}; // CosNotifyFilter
+
+#endif /* COSNOTIFYFILTER_IDL */

@@ -1,0 +1,91 @@
+#ifndef COS_EVENTCOMM_IDL
+#define COS_EVENTCOMM_IDL
+ 
+/**
+ * CORBA Common Object Services: Event Service.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.0
+ */
+
+#pragma prefix "omg.org"
+
+module CosEventComm
+{
+   /**
+    * Exception indicating that a supplier or consumer is disconnected.
+    */
+   exception Disconnected {};
+
+   /**
+    * Interface for a push consumer.
+    */
+   interface PushConsumer
+   {
+      /**
+       * Push an event onto this consumer.
+       * @parm <code>data</code> - The event data.
+       * @raises Disconnected If this consumer is disconnected.
+       */
+      void push (in any data) raises (Disconnected);
+
+      /**
+       * Disconnect a push consumer.
+       */
+      void disconnect_push_consumer (); 
+   };
+
+   /**
+    * Interface for a push supplier.
+    */
+   interface PushSupplier
+   {      
+      /**
+       * Disconnect a push supplier.
+       */
+      void disconnect_push_supplier ();
+   };
+
+   /**
+    * Interface for a pull supplier.
+    */
+   interface PullSupplier
+   {    
+      /**
+       * Pull an event from this supplier
+       * @returns The event.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      any pull () raises (Disconnected);
+    
+      /**
+       * Try to pull an event from this supplier.
+       * @parm <code>has_event</code> - boolean indicating if supplier
+       * has an event.
+       * @returns The event if <code>has_event</code> is true.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      any try_pull (out boolean has_event) raises (Disconnected);      
+
+      /**
+       * Disconnect a pull supplier.
+       */
+      void disconnect_pull_supplier (); 
+   };
+
+   /**
+    * Interface for a pull consumer.
+    */
+   interface PullConsumer
+   {
+      /**
+       * Disconnect a pull consumer.
+       */
+      void disconnect_pull_consumer ();
+   };
+};
+
+#endif /* COS_EVENTCOMM_IDL */

@@ -1,0 +1,1084 @@
+/* docdef: costrade */
+#ifndef COS_TRADING_IDL
+#define COS_TRADING_IDL
+
+#pragma prefix "omg.org"
+
+/**
+  * @author OMG
+  * @version Version 1.0
+  */
+
+module CosTrading
+{
+   typedef Object TypeRepository;
+   typedef string Istring;
+   /* doc: 6 */	
+   typedef Istring ServiceTypeName;
+   /* enddoc */
+   typedef Istring Constraint;
+   typedef Istring PropertyName;
+   typedef sequence <PropertyName> PropertyNameSeq;
+   typedef any PropertyValue;
+   typedef string OfferId;
+   typedef sequence <OfferId> OfferIdSeq;
+   typedef Istring LinkName;
+   typedef sequence <LinkName> LinkNameSeq;
+   typedef LinkNameSeq TraderName;
+   typedef string PolicyName;
+   typedef sequence <PolicyName> PolicyNameSeq;
+   typedef any PolicyValue;
+
+/** A service types describes a service supporting a
+ * number of properties. Properties are a name/value tuples.
+ * The value field holds both the type and value of a
+ * property. Property types must correspond to the type defined
+ * for the property by the corresponding service type.
+ */
+
+   struct Property
+   {
+      PropertyName name;
+      PropertyValue value;
+   };
+   typedef sequence <Property> PropertySeq;
+
+/** This structure contains information about an object exported
+ * by the trader. It contains a reference to the object and
+ * the properties that describe the object.
+ */
+
+   struct Offer
+   {
+      Object reference;
+      PropertySeq properties;
+   };
+   typedef sequence <Offer> OfferSeq;
+
+/** Policies determine trader behavior, for example, when
+ * queries are evaluated. Policies exist to determine the
+ * cardinality of offers and property matching criteria.
+ */
+
+   struct Policy
+   {
+      PolicyName name;
+      PolicyValue value;
+   };
+   typedef sequence <Policy> PolicySeq;
+
+/** This enum is used to determine the behaviour 
+ * of the trader when traders are linked together.
+ * <pre>
+ * local_only	- Do not use other linked traders.
+ * if_no_local	- Use linked traders if a query cannot be resolved locally.
+ * always		- Always use linked traders.
+ * </pre>
+ */
+
+   enum FollowOption
+   {
+      local_only,
+      if_no_local,
+      always
+   };
+
+   interface Lookup;
+   interface Register;
+   interface Link;
+   interface Proxy;
+   interface Admin;
+   interface OfferIterator;
+   interface OfferIdIterator;
+
+   exception IllegalServiceType
+   {
+      ServiceTypeName type;
+   };
+   exception UnknownServiceType
+   {
+      ServiceTypeName type;
+   };
+   exception IllegalConstraint
+   {
+      Constraint constr;
+   };
+   exception IllegalOfferId
+   {
+      OfferId id;
+   };
+   exception IllegalPropertyName
+   {
+      PropertyName name;
+   };
+   exception InvalidLookupRef
+   {
+      Lookup target;
+   };
+   exception DuplicatePolicyName
+   {
+      PolicyName name;
+   };
+   exception DuplicatePropertyName
+   {
+      PropertyName name;
+   };
+   exception MissingMandatoryProperty
+   {
+      ServiceTypeName type;
+      PropertyName name;
+   };
+   exception PropertyTypeMismatch
+   {
+      ServiceTypeName type;
+      Property prop;
+   };
+   exception ReadonlyDynamicProperty
+   {
+      ServiceTypeName type;
+      PropertyName name;
+   };
+   exception UnknownOfferId
+   {
+      OfferId id;
+   };
+   exception UnknownMaxLeft {};
+   exception NotImplemented {};
+
+/** This interface has references to the componet services
+ * that make up a trader. Not all services may be present,
+ * depending on the type of trader.
+ */
+
+   interface TraderComponents
+   {
+      readonly attribute Lookup lookup_if;
+      readonly attribute Register register_if;
+      readonly attribute Link link_if;
+      readonly attribute Proxy proxy_if;
+      readonly attribute Admin admin_if;
+   };
+
+/** This interface contains attributes that describe
+ * type of functionality supported by a trader service.
+ */
+
+   interface SupportAttributes
+   {
+      readonly attribute boolean supports_modifiable_properties;
+      readonly attribute boolean supports_dynamic_properties;
+      readonly attribute boolean supports_proxy_offers;
+      readonly attribute TypeRepository type_repos;
+   };
+
+/** This interface contains attributes that describe
+ * policies used witin the trader when resolving queries.
+ */
+
+   interface ImportAttributes
+   {
+      readonly attribute unsigned long def_search_card;
+      readonly attribute unsigned long max_search_card;
+      readonly attribute unsigned long def_match_card;
+      readonly attribute unsigned long max_match_card;
+      readonly attribute unsigned long def_return_card;
+      readonly attribute unsigned long max_return_card;
+      readonly attribute unsigned long max_list;
+      readonly attribute unsigned long def_hop_count;
+      readonly attribute unsigned long max_hop_count;
+      readonly attribute FollowOption def_follow_policy;
+      readonly attribute FollowOption max_follow_policy;
+   };
+
+/** This interface contains attributes that describe
+ * policies used witin the trader when following links
+ * to other linked traders.
+ */
+
+   interface LinkAttributes
+   {
+      readonly attribute FollowOption max_link_follow_policy;
+   };
+
+/** This interface supports operations to iterate through
+ * lists of OfferIds returned by the CosTrading::Admin
+ * interface.
+ */
+
+   interface OfferIdIterator
+   {
+/** This operation returns the number of remaining
+ * OfferIds contained within the iterator.
+ *
+ * @returns - The number of remaining OfferIds.
+ * @raises UnknownMaxLeft - If the number of remaining OfferIds
+ *                          cannot be determined. 
+ */
+
+      unsigned long max_left () raises (UnknownMaxLeft);
+
+/** This operation returns up to a specified number
+ * of remaining OfferIDs.
+ *
+ * @param n - The number of OfferIds to return.
+ * @param ids - The sequence of returned OfferIds.
+ * @returns - TRUE if there are more OfferIds to retrieve.
+ */
+
+      boolean next_n (in unsigned long n, out OfferIdSeq ids);
+
+/** This operation destroys the OfferIDIterator and
+ * and any OfferIds it contains. This should be called
+ * after a client has finished with the iterator.
+ */
+
+      void destroy ();
+   };
+
+/** This interface supports operations to iterate through
+ * lists of Offers returned by the CosTrading::Lookup::query
+ * operation.
+ */
+
+   interface OfferIterator
+   {
+/** This operation returns the number of remaining
+ * Offers contained within the iterator.
+ *
+ * @returns - The number of remaining offers.
+ * @raises UnknownMaxLeft - If the number of remaining offers
+ *                          cannot be determined. 
+ */
+
+      unsigned long max_left () raises (UnknownMaxLeft);
+
+/** This operation returns up to a specified number
+ * of remaining Offers.
+ *
+ * @param n - The number of Offers to return.
+ * @param offers - The sequence of returned Offers.
+ * @returns - TRUE if there are more Offers to retrieve.
+ */
+
+      boolean next_n (in unsigned long n, out OfferSeq offers);
+
+/** This operation destroys the OfferIterator and
+ * and any Offers it contains. This should be called
+ * after a client has finished with the iterator.
+ */
+
+      void destroy ();
+   };
+
+/** This interface is used to query the trader and retrieve
+ * offers which match specified conditions and constraints.
+ */
+
+   interface Lookup : TraderComponents, SupportAttributes, ImportAttributes
+   {
+      typedef Istring Preference;
+
+/** This enum is used to determine whether to return
+ * property information with returned offers.
+ * <pre>
+ * none	- Do not return properties.
+ * some	- Return specified properties.
+ * all	- Return all properties.
+ * </pre>
+ */
+
+      enum HowManyProps
+      {
+         none,
+         some,
+         all
+      };
+
+/** This union is used in a query to determine which
+ * properties should be retrieved with returned offers.
+ * If some properties are to be retrieved these are
+ * specified by name in a property name sequence.
+ */
+
+      union SpecifiedProps switch (HowManyProps)
+      {
+         case some : PropertyNameSeq prop_names;
+         case none : short none_dummy;
+         case all  : short all_dummy;
+      };
+
+      exception IllegalPreference
+      {
+         Preference pref;
+      };
+      exception IllegalPolicyName
+      {
+         PolicyName name;
+      };
+      exception InvalidPolicyValue
+      {
+         Policy the_policy;
+      };
+      exception PolicyTypeMismatch
+      {
+         Policy the_policy;
+      };
+
+/** This operation querys the trader for offers. The
+ * various call parameters determine how the trader
+ * finds offers to satisfy the query.
+ *
+ * @param type - The servivce type of the returned offers.
+ * @param constr - The constraint string used for restricting
+ *                 suitable offers.
+ * @param pref - The preference string used to order returned
+ *               offers.
+ * @param policies - Policies used to override default trader
+ *                   query policies.
+ * @param desired_props - Specifies which properties to return
+ *                        with offers.
+ * @param how_many - The maximum number of offers to be returned.
+ * @param offers - The sequence of returned offers.
+ * @param offer_iter - A reference to an OfferIterator object
+ *                     used to access offers not directly returned
+ *                     in the offer sequence.
+ * @param limit_applied - The limits applied by the trader while
+ *                        processing the query.
+ *
+ * @raises IllegalServiceType - If the specified service type
+ *                              name is invalid.
+ * @raises UnknownServiceType - If the specified service type
+ *                              has not been registered.
+ * @raises IllegalConstraint - If the constraint string is invalid.
+ * @raises IllegalPreference - If the preference string is invalid.
+ * @raises IllegalPolicyName - If an invalid policy name was specified.
+ * @raises PolicyTypeMismatch - If the type of a specified policy does
+ *                              not match that of the specification.
+ * @raises InvalidPolicyValue - If the value of a policy is invalid.
+ * @raises IllegalPropertyName - If a property name is illegal.
+ * @raises DuplicatePropertyName - If duplicate property names are specified.
+ * @raises DuplicatePolicyName - If duplicate policy names are specified.
+ */
+      /* doc: 25 */	
+      void query
+      (
+         in ServiceTypeName type,
+         in Constraint constr,
+         in Preference pref,
+         in PolicySeq policies,
+         in SpecifiedProps desired_props,
+         in unsigned long how_many,
+         out OfferSeq offers,
+         out OfferIterator offer_iter,
+         out PolicyNameSeq limits_applied
+      )
+      raises
+      (
+         IllegalServiceType,
+         UnknownServiceType,
+         IllegalConstraint,
+         IllegalPreference,
+         IllegalPolicyName,
+         PolicyTypeMismatch,
+         InvalidPolicyValue,
+         IllegalPropertyName,
+         DuplicatePropertyName,
+         DuplicatePolicyName
+      );
+      /* enddoc */	
+   };
+
+/** This interface is used export offers of service to
+ * the trader and manage these offers.
+ */
+
+   interface Register : TraderComponents, SupportAttributes
+   {
+      exception IllegalTraderName
+      {
+         TraderName name;
+      };
+      exception InvalidObjectRef
+      {
+         Object ref;
+      };
+      exception InterfaceTypeMismatch
+      {
+         ServiceTypeName type;
+         Object reference;
+      };
+      exception MandatoryProperty
+      {
+         ServiceTypeName type;
+         PropertyName name;
+      };
+      exception NoMatchingOffers
+      {
+         Constraint constr;
+      };
+      exception ProxyOfferId
+      {
+         OfferId id;
+      };
+      exception ReadonlyProperty
+      {
+         ServiceTypeName type;
+         PropertyName name;
+      };
+      exception RegisterNotSupported
+      {
+         TraderName name;
+      };
+      exception UnknownPropertyName
+      {
+         PropertyName name;
+      };
+      exception UnknownTraderName
+      {
+         TraderName name;
+      };
+
+/** This structure holds information about an offer.
+ * It contains a eference to the object making the
+ * offer, the name of the service type it provides
+ * and a set of properties it supports.
+ */
+
+      struct OfferInfo
+      {
+         Object reference;
+         ServiceTypeName type;
+         PropertySeq properties;
+      };
+
+/** This operation exports an offer of service to the
+ * trader with a set of properties it supports.
+ *
+ * @returns - An offer identifier.
+ *
+ * @param reference - The object making the offer.
+ * @param type - The service type name of the offer.
+ * @param properties - A sequence of supported properties.
+ *
+ * @raises InvalidObjectRef - If the object reference is not valid.
+ * @raises IllegalServiceType - If the specified service type
+ *                              name is invalid.
+ * @raises UnknownServiceType - If the specified service type
+ *                              has not been registered.
+ * @raises InterfaceTypeMismatch - The object does not support the interface
+ *                                 specified in the service definition.
+ * @raises IllegalPropertyName - If a property name is illegal.
+ * @raises DuplicatePropertyName - If duplicate property names are specified.
+ * @raises PropertyTypeMismatch - If the type of a property does not match
+ *                                the type specified in the service definition.
+ * @raises ReadonlyDynamicProperty - If an attempt has been made to assign a dynamic
+ *                                   property value to a property defined as
+ *                                   read-only in the service definition.
+ * @raises MissingMandatoryProperty - If a property defined as mandatory in the
+ *                                    service definition has not been supplied.
+ */
+      /* doc: 37 */	
+      OfferId export
+      (
+         in Object reference,
+         in ServiceTypeName type,
+         in PropertySeq properties
+      )
+      raises
+      (
+         InvalidObjectRef,
+         IllegalServiceType,
+         UnknownServiceType,
+         InterfaceTypeMismatch,
+         IllegalPropertyName,
+         PropertyTypeMismatch,
+         ReadonlyDynamicProperty,
+         MissingMandatoryProperty,
+         DuplicatePropertyName
+      );
+      /* enddoc */
+/** This operation withdraws an offer of service
+ * from the trader.
+ *
+ * @param id - The identifier of the offer to be withdrawn.
+ *
+ * @raises IllegalOfferId - If the format of the offer identifier is invalid.
+ * @raises UnknownOfferId - If the trader knows nothing of the identified offer.
+ * @raises ProxyOfferId - The trader cannot withdraw the proxy offer.
+ */
+
+      /* doc: 35 */
+      void withdraw
+      (
+         in OfferId id
+      )
+      raises
+      (
+         IllegalOfferId,
+         UnknownOfferId,
+         ProxyOfferId
+      );
+      /* enddoc */
+
+/** This operation describes an offer of service
+ * from the trader.
+ *
+ * @returns - An offer descriptor structure.
+ *
+ * @param id - The identifier of the offer to be described.
+ *
+ * @raises IllegalOfferId - If the format of the offer identifier is invalid.
+ * @raises UnknownOfferId - If the trader knows nothing of the identified offer.
+ * @raises ProxyOfferId - The trader cannot describe the proxy offer.
+ */
+      /* doc: 31 */
+      OfferInfo describe
+      (
+         in OfferId id
+      )
+      raises
+      (
+         IllegalOfferId,
+         UnknownOfferId,
+         ProxyOfferId
+      );
+      /* enddoc */
+
+/** This operation modifies the properties supported
+ * by a traded offer of service. Properties that are read-only
+ * or mandatory may not be deleted and properties that are
+ * read-only may not be modified.
+ *
+ * @param id - The identifier of the offer to be modified.
+ * @param del_list - The list of properties to be deleted.
+ * @param modify_list - The list of properties to be added or modified.
+ *
+ * @raises NotImplemented - If this operation is not implemented by the trader.
+ * @raises IllegalOfferId - If the format of the offer identifier is invalid.
+ * @raises UnknownOfferId - If the trader knows nothing of the identified offer.
+ * @raises ProxyOfferId - The trader cannot withdraw the proxy offer.
+ * @raises IllegalPropertyName - If a property name is illegal.
+ * @raises UnknownPropertyName - If the offer does not support the named property.
+ * @raises PropertyTypeMismatch - If the type of a property does not match
+ *                                the type specified in the service definition.
+ * @raises ReadonlyDynamicProperty - If an attempt has been made to assign a dynamic
+ *                                   property value to a mandatory property.
+ * @raises MandatoryProperty - If an attemp has been made to delete a mandatory property
+ * @raises ReadonlyProperty - If an attemp has been made to modify a read-only property
+ * @raises DuplicatePropertyName - If duplicate property names are specified.
+ */
+
+      void modify
+      (
+         in OfferId id,
+         in PropertyNameSeq del_list,
+         in PropertySeq modify_list
+      )
+      raises
+      (
+         NotImplemented,
+         IllegalOfferId,
+         UnknownOfferId,
+         ProxyOfferId,
+         IllegalPropertyName,
+         UnknownPropertyName,
+         PropertyTypeMismatch,
+         ReadonlyDynamicProperty,
+         MandatoryProperty,
+         ReadonlyProperty,
+         DuplicatePropertyName
+      );
+
+/** This operation withdraws any offers matching the
+ * specified constraints.
+ *
+ * @param type - The service type of offers to check. 
+ * @param type - The constraint string to check offers against.
+ *
+ * @raises IllegalServiceType - If the specified service type
+ *                              name is invalid.
+ * @raises UnknownServiceType - If the specified service type
+ *                              has not been registered.
+ * @raises IllegalConstraint - If the constraint string is illegal.
+ * @raises NoMatchingOffers - If no offers corresponding to the service type
+ *                            and satisfying the constraints were found.
+ */
+
+      void withdraw_using_constraint
+      (
+         in ServiceTypeName type,
+         in Constraint constr
+      )
+      raises
+      (
+         IllegalServiceType,
+         UnknownServiceType,
+         IllegalConstraint,
+         NoMatchingOffers
+      );
+
+/** This opreration resolves the Register interface of a linked trader.
+ *
+ * @param name - The name of the linked trader. 
+ *
+ * @raises IllegalTraderName - If the specified trader name has invalid syntax.
+ * @raises UnknownTraderName - If the specified trader cannot be found.
+ * @raises RegisterNotSupported - If the specified trader does not support
+ *                                the Register interface.
+ */
+
+      Register resolve
+      (
+         in TraderName name
+      )
+      raises
+      (
+         IllegalTraderName,
+         UnknownTraderName,
+         RegisterNotSupported
+      );
+   };
+
+/** This interface is used to federate traders
+ * together and manage the links between them.
+ */
+
+   interface Link : TraderComponents, SupportAttributes, LinkAttributes
+   {
+/** This structure holds information about federated
+ * trader interfaces. It holds references to the Lookup
+ * and Register interfaces on the linked trader. Plus
+ * policy options about how the link is used.
+ */
+
+      struct LinkInfo
+      {
+         Lookup target;
+         Register target_reg;
+         FollowOption def_pass_on_follow_rule;
+         FollowOption limiting_follow_rule;
+      };
+
+      exception IllegalLinkName
+      {
+         LinkName name;
+      };
+
+      exception UnknownLinkName
+      {
+         LinkName name;
+      };
+
+      exception DuplicateLinkName
+      {
+         LinkName name;
+      };
+
+      exception DefaultFollowTooPermissive
+      {
+         FollowOption def_pass_on_follow_rule;
+         FollowOption limiting_follow_rule;
+      };
+
+      exception LimitingFollowTooPermissive
+      {
+         FollowOption limiting_follow_rule;
+         FollowOption max_link_follow_policy;
+      };
+
+/** This operation links a federated trader.
+ *
+ * @param name - The name of the linked trader. 
+ * @param target - The Lookup interface to link.
+ * @param def_pass_on_follow_rule - The default lookup policy to propagate 
+ *                                  if none was specified in the query.
+ * @param limiting_follow_rule - The most permissive link policy that can
+ *                               be applied to the link. 
+ *
+ * @raises IllegalLinkName - If the specified link name has invalid syntax.
+ * @raises DuplicateLinkName - If a link with the same name already exists.
+ * @raises InvalidLookupRef - If the specified target reference is nil.
+ * @raises DefaultFollowTooPermissive - If the default lookup policy for the
+ *                                      link is more premissive than the limiting
+ *                                      lookup policy for the link.
+ * @raises LimitingFollowTooPermissive - If the link default lookup policy is
+ *                                       more permissive that the corresponding
+ *                                       trader maximum allowed value.
+ */
+
+      void add_link
+      (
+         in LinkName name,
+         in Lookup target,
+         in FollowOption def_pass_on_follow_rule,
+         in FollowOption limiting_follow_rule
+      )
+      raises
+      (
+         IllegalLinkName,
+         DuplicateLinkName,
+         InvalidLookupRef,
+         DefaultFollowTooPermissive,
+         LimitingFollowTooPermissive
+      );
+
+/** This operation removes a link to a federated trader. 
+ *
+ * @param name - The name of the linked trader. 
+ *
+ * @raises IllegalLinkName - If the specified link name has invalid syntax.
+ * @raises UnknownLinkName - If the specified link cannot be found.
+ */
+
+      void remove_link
+      (
+         in LinkName name
+      )
+      raises
+      (
+         IllegalLinkName,
+         UnknownLinkName
+      );
+
+/** This operation describes a link to a federated trader,
+ * returning a structure containing the link description.
+ *
+ * @returns - A link infromation structure.
+ * @param name - The name of the linked trader. 
+ *
+ * @raises IllegalLinkName - If the specified link name has invalid syntax.
+ * @raises UnknownLinkName - If the specified link cannot be found.
+ */
+
+      LinkInfo describe_link
+      (
+         in LinkName name
+      )
+      raises
+      (
+         IllegalLinkName,
+         UnknownLinkName
+      );
+
+/** This operation returns a sequence of links. */
+
+      LinkNameSeq list_links ();
+
+/** This operation modifies a link to a federated trader,
+ * changing the follow options that are applied to the link.
+ *
+ * @param name - The name of the linked trader. 
+ * @param def_pass_on_follow_rule - The default lookup policy to propagate 
+ *                                  if none was specified in the query.
+ * @param limiting_follow_rule - The most permissive link policy that can
+ *                               be applied to the link. 
+ *
+ * @raises IllegalLinkName - If the specified link name has invalid syntax.
+ * @raises UnknownLinkName - If the specified link cannot be found.
+ * @raises DefaultFollowTooPermissive - If the default lookup policy for the
+ *                                      link is more premissive than the limiting
+ *                                      lookup policy for the link.
+ * @raises LimitingFollowTooPermissive - If the link default lookup policy is
+ *                                       more permissive that the corresponding
+ *                                       trader maximum allowed value.
+ */
+
+      void modify_link
+      (
+         in LinkName name,
+         in FollowOption def_pass_on_follow_rule,
+         in FollowOption limiting_follow_rule
+      )
+      raises
+      (
+         IllegalLinkName,
+         UnknownLinkName,
+         DefaultFollowTooPermissive,
+         LimitingFollowTooPermissive
+      );
+   };
+
+/** This interface supports proxy offers.
+ * It is not yet supported.
+ */
+
+   interface Proxy : TraderComponents, SupportAttributes
+   {
+      typedef Istring ConstraintRecipe;
+
+      struct ProxyInfo
+      {
+         ServiceTypeName type;
+         Lookup target;
+         PropertySeq properties;
+         boolean if_match_all;
+         ConstraintRecipe recipe;
+         PolicySeq policies_to_pass_on;
+      };
+
+      exception IllegalRecipe
+      {
+         ConstraintRecipe recipe;
+      };
+
+      exception NotProxyOfferId
+      {
+         OfferId id;
+      };
+      
+      /* doc: 51 */		
+      OfferId export_proxy
+      (
+         in Lookup target,
+         in ServiceTypeName type,
+         in PropertySeq properties,
+         in boolean if_match_all,
+         in ConstraintRecipe recipe,
+         in PolicySeq policies_to_pass_on
+      )
+      raises
+      (
+         IllegalServiceType,
+         UnknownServiceType,
+         InvalidLookupRef,
+         IllegalPropertyName,
+         PropertyTypeMismatch,
+         ReadonlyDynamicProperty,
+         MissingMandatoryProperty,
+         IllegalRecipe,
+         DuplicatePropertyName,
+         DuplicatePolicyName
+      );
+      /* enddoc */
+
+      void withdraw_proxy
+      (
+         in OfferId id
+      )
+      raises
+      (
+         IllegalOfferId,
+         UnknownOfferId,
+         NotProxyOfferId
+      );
+ 
+      ProxyInfo describe_proxy
+      (
+         in OfferId id
+      )
+      raises
+      (
+         IllegalOfferId,
+         UnknownOfferId,
+         NotProxyOfferId
+      );
+   };
+
+/** This interface is used to manage the various policies
+ * and constraints applied by the trader.
+ */
+
+   interface Admin :
+      TraderComponents,
+      SupportAttributes,
+      ImportAttributes,
+      LinkAttributes
+   {
+      typedef sequence <octet> OctetSeq;
+ 
+      readonly attribute OctetSeq request_id_stem;
+ 
+/* This operation sets the default search cardinality applied to queries. 
+ *
+ * @returns - The previous default search cardinality.
+ * @param value - The new default serach cardinality.
+ */
+
+      unsigned long set_def_search_card (in unsigned long value);
+
+/* This operation sets the maximum search cardinality applied to queries. 
+ *
+ * @returns - The previous maximum search cardinality.
+ * @param value - The new maximum search cardinality.
+ */
+
+      unsigned long set_max_search_card (in unsigned long value);
+ 
+/* This operation sets the default match cardinality applied to queries. 
+ *
+ * @returns - The previous default match cardinality.
+ * @param value - The new default match cardinality.
+ */
+
+      unsigned long set_def_match_card  (in unsigned long value);
+
+/* This operation sets the maximum match cardinality applied to queries. 
+ *
+ * @returns - The previous maximum match cardinality.
+ * @param value - The new maximum match cardinality.
+ */
+
+      unsigned long set_max_match_card  (in unsigned long value);
+
+/* This operation sets the default return cardinality applied to queries. 
+ *
+ * @returns - The previous default return cardinality.
+ * @param value - The new default return cardinality.
+ */
+
+      unsigned long set_def_return_card (in unsigned long value);
+
+/* This operation sets the maximum return cardinality applied to queries. 
+ *
+ * @returns - The previous maximum return cardinality.
+ * @param value - The new maximum return cardinality.
+ */
+
+      unsigned long set_max_return_card (in unsigned long value);
+
+/* This operation sets the maximum size for an iterator. 
+ *
+ * @returns - The previous maximum iterator size.
+ * @param value - The new maximum iterator size.
+ */
+
+      unsigned long set_max_list (in unsigned long value);
+
+/* This operation sets the default hop count used when resolving
+ * federated queries. 
+ *
+ * @returns - The previous default hop count.
+ * @param value - The new default hop count.
+ */
+
+      unsigned long set_def_hop_count (in unsigned long value);
+
+/* This operation sets the maximum hop count used when resolving
+ * federated queries. 
+ *
+ * @returns - The previous maximum hop count.
+ * @param value - The new maximum hop count.
+ */
+
+      unsigned long set_max_hop_count (in unsigned long value);
+
+/* This operation sets whether the trader supports modifiable
+ * properties.
+ *
+ * @returns - TRUE if modifiable properties were supported.
+ * @param value - TRUE if modifiable properties are to be supported.
+ */
+
+      boolean set_supports_modifiable_properties (in boolean value);
+
+/* This operation sets whether the trader supports dynamic
+ * properties.
+ *
+ * @returns - TRUE if dynamic properties were supported.
+ * @param value - TRUE if dynamic properties are to be supported.
+ */
+
+      boolean set_supports_dynamic_properties (in boolean value);
+
+/* This operation sets whether the trader supports proxy 
+ * offers.
+ *
+ * @returns - TRUE if proxy offers were supported.
+ * @param value - TRUE if proxy offers are to be supported.
+ */
+
+      boolean set_supports_proxy_offers (in boolean value);
+
+/* This operation sets the default follow option applied to link
+ * traversal for query resolution.
+ *
+ * @returns - The previous default follow option.
+ * @param value - The new default follow option.
+ */
+
+      FollowOption set_def_follow_policy (in FollowOption policy);
+
+/* This operation sets the maximum follow option applied to link
+ * traversal for query resolution.
+ *
+ * @returns - The previous maximum follow option.
+ * @param value - The new maximum follow option.
+ */
+
+      FollowOption set_max_follow_policy (in FollowOption policy);
+
+/* This operation sets the maximum follow option that can
+ * be applied to links.
+ *
+ * @returns - The previous maximum link follow option.
+ * @param value - The new maximum link follow option.
+ */
+
+      FollowOption set_max_link_follow_policy (in FollowOption policy);
+
+/* This operation sets the service type repository for a trader.
+ *
+ * @returns - The previous service type repository.
+ * @param repository - The new service type repository.
+ */
+
+      TypeRepository set_type_repos (in TypeRepository repository);
+
+/* This operation sets a request identifier stem value.
+ * This is used to generate unique query identifiers to
+ * prevent cyclic query resolution amongst federated traders.
+ *
+ * @returns - The previous identifier stem.
+ * @param stem - The new identifier stem.
+ */
+
+      OctetSeq set_request_id_stem (in OctetSeq stem);
+ 
+/* This operation returns a list of offers made by the
+ * trader. Offer identifiers not returned in the returned
+ * sequence can be accessed through the returned iterator.
+ *
+ * @param how_many - The number of offers to return.
+ * @param ids - The sequence of returned offer identifiers.
+ * @param id_itr - The returned offer iterator.
+ *
+ * @raises NotImplemented - If this operation is not implemented by the trader.
+ */
+      /* doc: 19 */	
+      void list_offers
+      (
+         in unsigned long how_many,
+         out OfferIdSeq ids,
+         out OfferIdIterator id_itr
+      )
+      raises
+      (
+         NotImplemented
+      );
+      /* enddoc */
+ 
+/* This operation returns a list of proxy offers made by the
+ * trader. Offer identifiers not returned in the returned
+ * sequence can be accessed through the returned iterator.
+ *
+ * @param how_many - The number of offers to return.
+ * @param ids - The sequence of returned offer identifiers.
+ * @param id_itr - The returned offer iterator.
+ *
+ * @raises NotImplemented - If the proxy interface is not implemented
+ *  by the trader
+ */
+
+      void list_proxies
+      (
+         in unsigned long how_many,
+         out OfferIdSeq ids,
+         out OfferIdIterator id_itr
+      ) raises
+      (
+         NotImplemented
+      );
+   };
+};
+
+#endif

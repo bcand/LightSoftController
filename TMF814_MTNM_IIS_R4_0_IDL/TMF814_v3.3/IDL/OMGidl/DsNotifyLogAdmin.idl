@@ -1,0 +1,60 @@
+#ifndef DSNOTIFYLOGADMIN_IDL
+#define DSNOTIFYLOGADMIN_IDL
+
+#include "DsEventLogAdmin.idl"
+#include "CosNotifyChannelAdmin.idl"
+#include "CosNotifyFilter.idl"
+#include "CosNotification.idl"
+
+/**
+ * CORBA OMG IDL from the Telecom Log Service, v1.1 specification.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.1
+ */
+
+#pragma prefix "omg.org"
+
+module DsNotifyLogAdmin
+{
+	interface NotifyLog :
+		DsEventLogAdmin::EventLog,
+		CosNotifyChannelAdmin::EventChannel
+	{
+		CosNotifyFilter::Filter get_filter();
+		void set_filter(in CosNotifyFilter::Filter filter);
+	};
+
+	interface NotifyLogFactory : DsLogAdmin::LogMgr,
+								CosNotifyChannelAdmin::ConsumerAdmin
+	{
+		NotifyLog create (
+			in DsLogAdmin::LogFullActionType full_action,
+			in unsigned long long max_size,
+			in DsLogAdmin::CapacityAlarmThresholdList thresholds,
+			in CosNotification::QoSProperties initial_qos,
+			in CosNotification::AdminProperties initial_admin,
+	 		out DsLogAdmin::LogId id
+		) raises (DsLogAdmin::InvalidLogFullAction,
+										DsLogAdmin::InvalidThreshold,
+										CosNotification::UnsupportedQoS,        
+										CosNotification::UnsupportedAdmin);
+
+		NotifyLog create_with_id (
+			in DsLogAdmin::LogId id,
+			in DsLogAdmin::LogFullActionType full_action,
+			in unsigned long long max_size,
+			in DsLogAdmin::CapacityAlarmThresholdList thresholds,
+			in CosNotification::QoSProperties initial_qos,
+			in CosNotification::AdminProperties initial_admin
+		) raises (DsLogAdmin::LogIdAlreadyExists,             
+									DsLogAdmin::InvalidLogFullAction,
+									DsLogAdmin::InvalidThreshold,
+									CosNotification::UnsupportedQoS,       
+									CosNotification::UnsupportedAdmin);
+	};
+};
+#endif

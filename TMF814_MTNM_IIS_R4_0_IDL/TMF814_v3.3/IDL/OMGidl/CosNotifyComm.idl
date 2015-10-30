@@ -1,0 +1,258 @@
+#ifndef COSNOTIFYCOMM_IDL 
+#define COSNOTIFYCOMM_IDL
+
+#include "CosEventComm.idl"
+#include "CosNotification.idl"
+
+/**
+ * CORBA Common Object Services: Notification Service.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.0.1
+ */
+
+#pragma prefix "omg.org"
+
+module CosNotifyComm
+{
+   /**
+    * Exception used to indicate an invalid event type.
+    */
+   exception InvalidEventType { CosNotification::EventType type; };
+
+   /**
+    * An interface used by event publishers.
+    */
+   interface NotifyPublish
+   {
+      /**
+       * Indicates that a supplier is changing the names of the types of
+       * events it is publishing.
+       * @parm <code>added</code> - The event types added.
+       * @parm <code>removed</code> - The event types removed.
+       * @raises InvalidEventType If any of the event type names in either 
+       * the of the input sequences are invalid.
+       */
+      void offer_change (
+	 in CosNotification::EventTypeSeq added,
+	 in CosNotification::EventTypeSeq removed )
+	 raises ( InvalidEventType );
+
+   }; // NotifyPublish
+
+   /**
+    * An interface used by event subscribers.
+    */
+   interface NotifySubscribe
+   {
+      /**
+       * Indicates that a consumer is changing the names of the types of
+       * events it is subscribed to.
+       * @parm <code>added</code> - The event types added.
+       * @parm <code>removed</code> - The event types removed.
+       * @raises InvalidEventType If any of the event type names in either 
+       * the of the input sequences are invalid.
+       */
+      void subscription_change(
+	 in CosNotification::EventTypeSeq added,
+	 in CosNotification::EventTypeSeq removed )
+	 raises ( InvalidEventType );
+
+   }; // NotifySubscribe
+
+   /**
+    * An interface for push consumers.
+    */
+   interface PushConsumer :
+      NotifyPublish,
+      CosEventComm::PushConsumer
+   {
+   }; // PushConsumer
+
+   /**
+    * An interface for pull consumers.
+    */
+   interface PullConsumer :
+      NotifyPublish,
+      CosEventComm::PullConsumer
+   {
+   }; // PullConsumer
+
+   /**
+    * An interface for pull suppliers.
+    */
+   interface PullSupplier :
+      NotifySubscribe,
+      CosEventComm::PullSupplier
+   {
+   }; // PullSupplier
+
+   /**
+    * An interface for push suppliers.
+    */
+   interface PushSupplier :
+      NotifySubscribe,
+      CosEventComm::PushSupplier
+   {
+   };
+
+   /**
+    * An interface for structured push consumers.
+    */
+   interface StructuredPushConsumer : NotifyPublish
+   {
+      /**
+       * Push a structured event onto this consumer.
+       * @parm <code>notification</code> - The structured event.
+       * @raises Disconnected If this consumer is disconnected.
+       */
+      void push_structured_event(
+	 in CosNotification::StructuredEvent notification)
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Disconnect this structured push consumer.
+       */
+      void disconnect_structured_push_consumer();
+
+   }; // StructuredPushConsumer
+
+   /**
+    * An interface for structured pull consumers.
+    */
+   interface StructuredPullConsumer : NotifyPublish
+   {
+      /**
+       * Disconnect this structured pull consumer.
+       */
+      void disconnect_structured_pull_consumer();
+   }; // StructuredPullConsumer
+
+   /**
+    * An interface for structured pull suppliers.
+    */
+   interface StructuredPullSupplier : NotifySubscribe
+   {
+      /**
+       * Pull a structured event from this supplier
+       * @returns The structured event.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      CosNotification::StructuredEvent pull_structured_event()
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Try to pull a structured event from this supplier.
+       * @parm <code>has_event</code> - boolean indicating if supplier has
+       * an event.
+       * @returns The structured event if has_event is true.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      CosNotification::StructuredEvent try_pull_structured_event(
+	 out boolean has_event)
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Disconnect this pull supplier.
+       */
+      void disconnect_structured_pull_supplier();
+
+   }; // StructuredPullSupplier
+
+   /**
+    * An interface for structured push suppliers.
+    */
+   interface StructuredPushSupplier : NotifySubscribe
+   {
+      /**
+       * Disconnect this push supplier.
+       */
+      void disconnect_structured_push_supplier();
+   }; // StructuredPushSupplier
+
+   /**
+    * An interface for sequence push consumers.
+    */
+   interface SequencePushConsumer : NotifyPublish
+   {
+      /**
+       * Push a sequence of events onto this consumer.
+       * @parm <code>notifications</code> - The event sequence.
+       * @raises Disconnected If this consumer is disconnected.
+       */
+      void push_structured_events(
+	 in CosNotification::EventBatch notifications)
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Disconnect this push consumer.
+       */
+      void disconnect_sequence_push_consumer();
+
+   }; // SequencePushConsumer
+
+   /**
+    * An interface for sequences pull consumers.
+    */
+   interface SequencePullConsumer : NotifyPublish
+   {
+      /**
+       * Disconnect this pull consumer.
+       */
+      void disconnect_sequence_pull_consumer();
+   }; // SequencePullConsumer
+
+   /**
+    * An interface for sequences pull suppliers.
+    */
+   interface SequencePullSupplier : NotifySubscribe
+   {
+      /**
+       * Pull a sequence of events from this supplier
+       * @parm <code>max_number</code> - The maximum number of events to
+       * retrieve.
+       * @returns The event sequence.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      CosNotification::EventBatch pull_structured_events(
+	 in long max_number )
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Try to pull a sequence of structured events from this supplier.
+       * @parm <code>max_number</code> - The maximum number of events to
+       * retrieve.
+       * @parm <code>has_event</code> - boolean indicating if supplier has
+       * an event.
+       * @returns The event sequence.
+       * @raises Disconnected If this supplier is disconnected.
+       */
+      CosNotification::EventBatch try_pull_structured_events(
+	 in long max_number,
+	 out boolean has_event)
+	 raises(CosEventComm::Disconnected);
+
+      /**
+       * Disconnect this pull supplier.
+       */
+      void disconnect_sequence_pull_supplier();
+
+   }; // SequencePullSupplier
+
+   /**
+    * An interface for sequences push suppliers.
+    */
+   interface SequencePushSupplier : NotifySubscribe
+   {
+      /**
+       * Disconnect this push supplier.
+       */
+      void disconnect_sequence_push_supplier();
+   }; // SequencePushSupplier
+
+}; // CosNotifyComm
+
+#endif /* COSNOTIFYCOMM_IDL */

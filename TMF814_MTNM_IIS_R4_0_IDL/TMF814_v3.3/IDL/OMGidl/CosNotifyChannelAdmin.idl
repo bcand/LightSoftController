@@ -1,0 +1,896 @@
+#ifndef COSNOTIFYCHANNELADMIN_IDL 
+#define COSNOTIFYCHANNELADMIN_IDL
+
+#include "CosEventComm.idl"
+#include "CosEventChannelAdmin.idl"
+#include "CosNotification.idl"
+#include "CosNotifyFilter.idl"
+
+/**
+ * CORBA Common Object Services: Notification Service.
+ * <p>
+ * The detailed specification is available from the
+ * <a href="http://www.omg.org">Object Managament Group</a>.
+ *
+ * @author OMG
+ * @version Version 1.0.1
+ */
+
+#pragma prefix "omg.org"
+
+module CosNotifyChannelAdmin
+{
+   /**
+    * Exception used to indicate that a connection is already active.
+    */
+   exception ConnectionAlreadyActive {};
+
+   /**
+    * Exception used to indicate that a connection is already inactive.
+    */
+   exception ConnectionAlreadyInactive {};
+
+   /**
+    * Exception used to indicate that a proxy is not connected.
+    */
+   exception NotConnected {};
+
+   // Forward declarations
+   interface ConsumerAdmin;
+   interface SupplierAdmin;
+   interface EventChannel;
+   interface EventChannelFactory;
+
+   /**
+    * Enumeration of proxy types supported by notification service.
+    */
+   enum ProxyType
+   {
+      PUSH_ANY,
+      PULL_ANY,
+      PUSH_STRUCTURED,
+      PULL_STRUCTURED,
+      PUSH_SEQUENCE,
+      PULL_SEQUENCE,
+      PUSH_TYPED,
+      PULL_TYPED
+   };
+
+   /**
+    * Enumeration of modes for obtaining subscription or offered types.
+    */
+   enum ObtainInfoMode
+   {
+      ALL_NOW_UPDATES_OFF,
+      ALL_NOW_UPDATES_ON,
+      NONE_NOW_UPDATES_OFF,
+      NONE_NOW_UPDATES_ON
+   };
+
+   /**
+    * An interface for proxy consumers.
+    */
+   interface ProxyConsumer :
+      CosNotification::QoSAdmin,
+      CosNotifyFilter::FilterAdmin
+   {
+      /**
+       * The type of this proxy.
+       */
+      readonly attribute ProxyType MyType;
+
+      /**
+       * The administration object that created this proxy.
+       */
+      readonly attribute SupplierAdmin MyAdmin;
+
+      /**
+       * Get a list of event type names which represent the event types that
+       * consumers connected to this channel are interested in receiving.
+       * @parm <code>mode</code> - The mode of type retrieval.
+       * @returns A sequence of event type names.
+       */
+      CosNotification::EventTypeSeq obtain_subscription_types(
+	 in ObtainInfoMode mode );
+
+      /**
+       * Validate whether or not this proxy can honour the specified 
+       * quality of service requirements.
+       * @parm <code>required_qos</code> - Quality of service name-value
+       * pairs which a client is interested in validating.
+       * @parm <code>available_qos</code> - Quality of service settings that
+       * this proxy can support in addition to the ones in the input sequence.
+       * @raises UnsupportedQoS If any of the quality of service settings
+       * in the input sequence could not be honoured.
+       */
+      void validate_event_qos (
+	 in CosNotification::QoSProperties required_qos,
+	 out CosNotification::NamedPropertyRangeSeq available_qos)
+	 raises (CosNotification::UnsupportedQoS);
+
+   }; // ProxyConsumer
+
+   /**
+    * An interface for proxy suppliers.
+    */
+   interface ProxySupplier :
+      CosNotification::QoSAdmin,
+      CosNotifyFilter::FilterAdmin
+   {
+      /**
+       * The type of this proxy.
+       */
+      readonly attribute ProxyType MyType;
+
+      /**
+       * The administration object that created this proxy.
+       */
+      readonly attribute ConsumerAdmin MyAdmin;
+
+      /**
+       * A mapping filter which if a non-nil reference will be consulted 
+       * for resolving the priority of the event.
+       */
+      attribute CosNotifyFilter::MappingFilter priority_filter;
+
+      /**
+       * A filter which if a non-nil reference will be consulted 
+       * for resolving the priority of the event.
+       */
+      attribute CosNotifyFilter::MappingFilter lifetime_filter;
+
+      /**
+       * Get a list of event type names that this proxy can potentially
+       * forward to its associated consumers.
+       * @parm <code>mode</code> - The mode of type retrieval.
+       * @returns A sequence of event type names.
+       */
+      CosNotification::EventTypeSeq obtain_offered_types(
+	 in ObtainInfoMode mode );
+
+      /**
+       * Validate whether or not this proxy can honour the specified 
+       * quality of service requirements.
+       * @parm <code>required_qos</code> - Quality of service name-value
+       * pairs which a client is interested in validating.
+       * @parm <code>available_qos</code> - Quality of service settings that
+       * this proxy can support in addition to the ones in the input sequence.
+       * @raises UnsupportedQoS If any of the quality of service settings
+       * in the input sequence could not be honoured.
+       */
+      void validate_event_qos (
+	 in CosNotification::QoSProperties required_qos,
+	 out CosNotification::NamedPropertyRangeSeq available_qos)
+	 raises (CosNotification::UnsupportedQoS);
+
+   }; // ProxySupplier
+
+   /**
+    * An interface for proxy push consumers.
+    */
+   interface ProxyPushConsumer :
+      ProxyConsumer,
+      CosNotifyComm::PushConsumer
+   {
+      /**
+       * Connect an any type push supplier to this proxy.
+       * @parm <code>push_supplier</code> - The <code>PushSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       */
+      void connect_any_push_supplier (
+	 in CosEventComm::PushSupplier push_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // ProxyPushConsumer
+
+   /**
+    * An interface for structured proxy push consumers.
+    */
+   interface StructuredProxyPushConsumer :
+      ProxyConsumer,
+      CosNotifyComm::StructuredPushConsumer
+   {
+      /**
+       * Connect a structured type push supplier to this proxy.
+       * @parm <code>push_supplier</code> - The <code>PushSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       */
+      void connect_structured_push_supplier (
+	 in CosNotifyComm::StructuredPushSupplier push_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // StructuredProxyPushConsumer
+
+   /**
+    * An interface for sequence proxy push consumers.
+    */
+   interface SequenceProxyPushConsumer :
+      ProxyConsumer,
+      CosNotifyComm::SequencePushConsumer
+   {
+      /**
+       * Connect a sequence type push supplier to this proxy.
+       * @parm <code>push_supplier</code> - The <code>PushSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       */
+      void connect_sequence_push_supplier (
+	 in CosNotifyComm::SequencePushSupplier push_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // SequenceProxyPushConsumer
+
+   /**
+    * An interface for proxy pull suppliers.
+    */
+   interface ProxyPullSupplier :
+      ProxySupplier,
+      CosNotifyComm::PullSupplier
+   {
+      /**
+       * Connect an any type pull consumer to this proxy.
+       * @parm <code>pull_consumer</code> - The <code>PullConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       */
+      void connect_any_pull_consumer (
+	 in CosEventComm::PullConsumer pull_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // ProxyPullSupplier
+
+   /**
+    * An interface for structured proxy pull suppliers.
+    */
+   interface StructuredProxyPullSupplier :
+      ProxySupplier,
+      CosNotifyComm::StructuredPullSupplier
+   {
+      /**
+       * Connect a structured type pull consumer to this proxy.
+       * @parm <code>pull_consumer</code> - The <code>PullConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       */
+      void connect_structured_pull_consumer (
+	 in CosNotifyComm::StructuredPullConsumer pull_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // StructuredProxyPullSupplier
+
+   /**
+    * An interface for sequence proxy pull suppliers.
+    */
+   interface SequenceProxyPullSupplier :
+      ProxySupplier,
+      CosNotifyComm::SequencePullSupplier
+   {
+      /**
+       * Connect a sequence type pull consumer to this proxy.
+       * @parm <code>pull_consumer</code> - The <code>PullConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       */
+      void connect_sequence_pull_consumer (
+	 in CosNotifyComm::SequencePullConsumer pull_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected);
+
+   }; // SequenceProxyPullSupplier
+
+   /**
+    * An interface for proxy pull consumers.
+    */
+   interface ProxyPullConsumer :
+      ProxyConsumer,
+      CosNotifyComm::PullConsumer
+   {
+      /**
+       * Connect an any type pull supplier to this proxy.
+       * @parm <code>pull_supplier</code> - The <code>PullSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       * @raises TypeError Illegal supplier type.
+       */
+      void connect_any_pull_supplier (
+	 in CosEventComm::PullSupplier pull_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop pulling events from its supplier.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start pulling events from its supplier.
+       * @raises ConnectionAlreadyActive Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // ProxyPullConsumer
+
+   /**
+    * An interface for structured proxy pull consumers.
+    */
+   interface StructuredProxyPullConsumer :
+      ProxyConsumer,
+      CosNotifyComm::StructuredPullConsumer
+   {
+      /**
+       * Connect a structured type pull supplier to this proxy.
+       * @parm <code>pull_supplier</code> - The <code>PullSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       * @raises TypeError Illegal supplier type.
+       */
+      void connect_structured_pull_supplier (
+	 in CosNotifyComm::StructuredPullSupplier pull_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop pulling events from its supplier.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start pulling events from its supplier.
+       * @raises ConnectionAlreadyActive Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // StructuredProxyPullConsumer
+
+   /**
+    * An interface for sequence proxy pull consumers.
+    */
+   interface SequenceProxyPullConsumer :
+      ProxyConsumer,
+      CosNotifyComm::SequencePullConsumer
+   {
+      /**
+       * Connect a sequence type pull supplier to this proxy.
+       * @parm <code>pull_supplier</code> - The <code>PullSupplier</code>
+       * object reference.
+       * @raises AlreadyConnected If this supplier is already connected.
+       * @raises TypeError Illegal supplier type.
+       */
+      void connect_sequence_pull_supplier (
+	 in CosNotifyComm::SequencePullSupplier pull_supplier)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop pulling events from its supplier.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start pulling events from its supplier.
+       * @raises ConnectionAlreadyActive</code> - Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // SequenceProxyPullConsumer
+
+   /**
+    * An interface for proxy push suppliers.
+    */
+   interface ProxyPushSupplier :
+      ProxySupplier,
+      CosNotifyComm::PushSupplier
+   {
+      /**
+       * Connect an any type push consumer to this proxy.
+       * @parm <code>push_consumer</code> - The <code>PushConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       * @raises TypeError Illegal consumer type.
+       */
+      void connect_any_push_consumer (
+	 in CosEventComm::PushConsumer push_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop sending events to its consumer. Note
+       * that events will still be queued while the connection is suspended.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start sending events to its consumer.
+       * All queued events will be forwarded to the consumers.
+       * @raises ConnectionAlreadyActive Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // ProxyPushSupplier
+
+   /**
+    * An interface for structured proxy push suppliers.
+    */
+   interface StructuredProxyPushSupplier :
+      ProxySupplier,
+      CosNotifyComm::StructuredPushSupplier
+   {
+      /**
+       * Connect a structured type push consumer to this proxy.
+       * @parm <code>push_consumer</code> - The <code>PushConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       * @raises TypeError Illegal consumer type.
+       */
+      void connect_structured_push_consumer (
+	 in CosNotifyComm::StructuredPushConsumer push_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop sending events to its consumer. Note
+       * that events will still be queued while the connection is suspended.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start sending events to its consumer.
+       * All queued events will be forwarded to the consumers.
+       * @raises ConnectionAlreadyActive Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // StructuredProxyPushSupplier
+
+   /**
+    * An interface for sequence proxy push suppliers.
+    */
+   interface SequenceProxyPushSupplier :
+      ProxySupplier,
+      CosNotifyComm::SequencePushSupplier
+   {
+      /**
+       * Connect a sequence type push consumer to this proxy.
+       * @parm <code>push_consumer</code> - The <code>PushConsumer</code>
+       * object reference.
+       * @raises AlreadyConnected If this consumer is already connected.
+       * @raises TypeError Illegal consumer type.
+       */
+      void connect_sequence_push_consumer (
+	 in CosNotifyComm::SequencePushConsumer push_consumer)
+	 raises(CosEventChannelAdmin::AlreadyConnected,
+		CosEventChannelAdmin::TypeError );
+
+      /**
+       * Causes this proxy to stop sending events to its consumer. Note
+       * that events will still be queued while the connection is suspended.
+       * @raises ConnectionAlreadyInactive Proxy already stopped.
+       * @raises NotConnected Proxy not connected.
+       */
+      void suspend_connection()
+	 raises(ConnectionAlreadyInactive, NotConnected);
+
+      /**
+       * Causes this proxy to start sending events to its consumer.
+       * All queued events will be forwarded to the consumers.
+       * @raises ConnectionAlreadyActive Proxy already started.
+       * @raises NotConnected Proxy not connected.
+       */
+      void resume_connection()
+	 raises(ConnectionAlreadyActive, NotConnected);
+
+   }; // SequenceProxyPushSupplier
+
+   /**
+    * A unique proxy identifier.
+    */
+   typedef long ProxyID;
+
+   /**
+    * A sequence of proxy identifiers.
+    */
+   typedef sequence <ProxyID> ProxyIDSeq;
+
+   /**
+    * Enumeration of client types.
+    */
+   enum ClientType
+   {
+      ANY_EVENT,
+      STRUCTURED_EVENT,
+      SEQUENCE_EVENT
+   };
+
+   /**
+    * Enumeration of filter group operators.
+    */
+   enum InterFilterGroupOperator { AND_OP, OR_OP };
+
+   /**
+    * A unique administration object identifier.
+    */
+   typedef long AdminID;
+
+   /**
+    * A sequence of administration identifiers.
+    */
+   typedef sequence<AdminID> AdminIDSeq;
+
+   /**
+    * Exception used to indicate that an administration object could
+    * not be found.
+    */
+   exception AdminNotFound {};
+
+   /**
+    * Exception used to indicate that a proxy object could not be found.
+    */
+   exception ProxyNotFound {};
+
+   /**
+    * Structure used for <code>AdminLimitExceeded</code> exceptions.
+    * It is a two-tuple of a property name and a property value.
+    */
+   struct AdminLimit
+   {
+      CosNotification::PropertyName name;
+      CosNotification::PropertyValue value;
+   };
+
+   /**
+    * Exception used to indicate that the number of allowed administration
+    * objects has been exceeded.
+    */
+   exception AdminLimitExceeded { AdminLimit admin_property_err; };
+
+   /**
+    * An interface for consumer administration objects.
+    */
+   interface ConsumerAdmin :
+      CosNotification::QoSAdmin,
+      CosNotifyComm::NotifySubscribe,
+      CosNotifyFilter::FilterAdmin,
+      CosEventChannelAdmin::ConsumerAdmin
+   {
+      /**
+       * A unique identifier for this administration object.
+       */
+      readonly attribute AdminID MyID;
+
+      /**
+       * The event channel object that created this administration object.
+       */
+      readonly attribute EventChannel MyChannel;
+
+      /**
+       * Indicates whether AND or OR semantics is used when combining 
+       * administration object filters and proxy filters.
+       */
+      readonly attribute InterFilterGroupOperator MyOperator;
+
+      /**
+       * A mapping filter which if a non-nil reference will be consulted 
+       * for resolving the priority of the event.
+       */
+      attribute CosNotifyFilter::MappingFilter priority_filter;
+
+      /**
+       * A mapping filter which if a non-nil reference will be consulted 
+       * for resolving the lifetime of the event.
+       */
+      attribute CosNotifyFilter::MappingFilter lifetime_filter;
+
+      /**
+       * A list of pull supplier proxies created by the administration object.
+       */
+      readonly attribute ProxyIDSeq pull_suppliers;
+
+      /**
+       * A list of push supplier proxies created by the administration object.
+       */
+      readonly attribute ProxyIDSeq push_suppliers;
+
+      /**
+       * Get the proxy with the specified ID.
+       * @parm <code>proxy_id</code> - The ID of the proxy to retrieve.
+       * @raises ProxyNotFound If no proxy with the specified ID could 
+       * be found.
+       */
+      ProxySupplier get_proxy_supplier (
+	 in ProxyID proxy_id )
+	 raises ( ProxyNotFound );
+
+      /**
+       * Obtain a pull supplier proxy for this administration object.
+       * @parm <code>ctype</code> - The client type.
+       * @parm <code>proxy_id</code> - The ID of the newly created proxy,
+       * i.e. the return value.
+       * @returns A ProxySupplier object reference.
+       * @raises AdminLimitExceeded If the number of proxies associated 
+       * with this administration object exceeds the MaxConsumers property.
+       */
+      ProxySupplier obtain_notification_pull_supplier (
+	 in ClientType ctype,
+	 out ProxyID proxy_id)
+	 raises ( AdminLimitExceeded );
+
+      /**
+       * Obtain a push supplier proxy for this administration object.
+       * @parm <code>ctype</code> - The client type.
+       * @parm <code>proxy_id</code> - The ID of the newly created proxy,
+       * i.e. the return value.
+       * @returns A ProxySupplier object reference.
+       * @raises AdminLimitExceeded If the number of proxies associated 
+       * with this administration object exceeds the MaxConsumers property.
+       */
+      ProxySupplier obtain_notification_push_supplier (
+	 in ClientType ctype,
+	 out ProxyID proxy_id)
+	 raises ( AdminLimitExceeded );
+
+      /**
+       * Destroy this administration object and all proxies created by it.
+       */
+      void destroy();
+
+   }; // ConsumerAdmin
+
+   /**
+    * An interface for supplier administration objects.
+    */
+   interface SupplierAdmin :
+      CosNotification::QoSAdmin,
+      CosNotifyComm::NotifyPublish,
+      CosNotifyFilter::FilterAdmin,
+      CosEventChannelAdmin::SupplierAdmin
+   {
+      /**
+       * A unique identified for this administration object.
+       */
+      readonly attribute AdminID MyID;
+
+      /**
+       * The event channel object that created this administration object.
+       */
+      readonly attribute EventChannel MyChannel;
+
+      /**
+       * Indicates whether AND or OR semantics is used when combining 
+       * administration object filters and proxy filters.
+       */
+      readonly attribute InterFilterGroupOperator MyOperator;
+
+      /**
+       * A list of pull consumer proxies created by the administration object.
+       */
+      readonly attribute ProxyIDSeq pull_consumers;
+
+      /**
+       * A list of pull consumer proxies created by the administration object.
+       */
+      readonly attribute ProxyIDSeq push_consumers;
+
+      /**
+       * Get the proxy with the specified ID.
+       * @parm <code>proxy_id</code> - The ID of the proxy to retrieve.
+       * @raises ProxyNotFound If no proxy with the specified ID could 
+       * be found.
+       */
+      ProxyConsumer get_proxy_consumer (
+	 in ProxyID proxy_id )
+	 raises ( ProxyNotFound );
+
+      /**
+       * Obtain a pull consumer proxy for this administration object.
+       * @parm <code>ctype</code> - The client type.
+       * @parm <code>proxy_id</code> - The ID of the newly created proxy,
+       * i.e. the return value.
+       * @returns A ProxyConsumer object reference.
+       * @raises AdminLimitExceeded If the number of proxies associated 
+       * with this administration object exceeds the MaxConsumers property.
+       */
+      ProxyConsumer obtain_notification_pull_consumer (
+	 in ClientType ctype,
+	 out ProxyID proxy_id)
+	 raises ( AdminLimitExceeded );
+
+      /**
+       * Obtain a push consumer proxy for this administration object.
+       * @parm <code>ctype</code> - The client type.
+       * @parm <code>proxy_id</code> - The ID of the newly created proxy,
+       * i.e. the return value.
+       * @returns A ProxyConsumer object reference.
+       * @raises AdminLimitExceeded If the number of proxies associated 
+       * with this administration object exceeds the MaxConsumers property.
+       */
+      ProxyConsumer obtain_notification_push_consumer (
+	 in ClientType ctype,
+	 out ProxyID proxy_id)
+	 raises ( AdminLimitExceeded );
+
+      /**
+       * Destroy this administration object and all proxies created by it.
+       */
+      void destroy();
+
+   }; // SupplierAdmin
+
+   /**
+    * An interface for the event channel.
+    */
+   interface EventChannel :
+      CosNotification::QoSAdmin,
+      CosNotification::AdminPropertiesAdmin,
+      CosEventChannelAdmin::EventChannel
+   {
+      /**
+       * The factory object that created this event channel object.
+       */
+      readonly attribute EventChannelFactory MyFactory;
+
+      /**
+       * The default consumer administration object. This object has the 
+       * unique identification number zero.
+       */
+      readonly attribute ConsumerAdmin default_consumer_admin;
+
+      /**
+       * The default supplier administration object. This object has the 
+       * unique identification number zero.
+       */
+      readonly attribute SupplierAdmin default_supplier_admin;
+
+      /**
+       * The default filter factory object for this event channel.
+       */
+      readonly attribute CosNotifyFilter::FilterFactory default_filter_factory;
+
+      /**
+       * Creates an administration object for event consumers.
+       * @parm <code>op</code> - Indicates whether the newly created
+       * administration object should use AND or OR semantics when combining
+       * administration object filters and proxy filters.
+       * @parm <code>id</code> - The unique identifier for the administration
+       * object.
+       * @returns A <code>ConsumerAdmin</code> object reference.
+       */
+      ConsumerAdmin new_for_consumers(
+	 in InterFilterGroupOperator op,
+	 out AdminID id );
+
+      /**
+       * Creates an administration object for event suppliers.
+       * @parm <code>op</code> - Indicates whether the newly created
+       * administration object should use AND or OR semantics when combining
+       * administration object filters and proxy filters.
+       * @parm <code>id</code> - The unique identifier for the administration
+       * object.
+       * @returns A <code>SupplierAdmin</code> object reference.
+       */
+      SupplierAdmin new_for_suppliers(
+	 in InterFilterGroupOperator op,
+	 out AdminID id );
+
+      /**
+       * Get an administration object from its ID.
+       * @parm <code>id</code> - A unique identifier for the administration
+       * object.
+       * @returns A <code>ConsumerAdmin</code> object reference.
+       * @raises AdminNotFound If no administration object with that ID
+       * could be found.
+       */
+      ConsumerAdmin get_consumeradmin ( in AdminID id )
+	 raises (AdminNotFound);
+
+      /**
+       * Get an administration object from its ID.
+       * @parm <code>id</code> - A unique identifier for the administration
+       * object.
+       * @returns A <code>SupplierAdmin</code> object reference.
+       * @raises AdminNotFound If no administration object with that ID
+       * could be found.
+       */
+      SupplierAdmin get_supplieradmin ( in AdminID id )
+	 raises (AdminNotFound);
+
+      /**
+       * Get all consumer administration objects.
+       * @returns A sequence of administration object unique identifiers.
+       */
+      AdminIDSeq get_all_consumeradmins();
+
+      /**
+       * Get all supplier administration objects.
+       * @returns A sequence of administration object unique identifiers.
+       */
+      AdminIDSeq get_all_supplieradmins();
+
+   }; // EventChannel
+
+   /**
+    * A unique event channel object identifier.
+    */
+   typedef long ChannelID;
+
+   /**
+    * A sequence of event channel object identifiers.
+    */
+   typedef sequence<ChannelID> ChannelIDSeq;
+
+   /**
+    * Exception used to indicate that a channel could not be found.
+    */
+   exception ChannelNotFound {};
+
+   /**
+    * An interface for the event channel factory.
+    */
+   interface EventChannelFactory
+   {
+      /**
+       * Create an event channel with specified quality of service.
+       * @parm <code>initial_qos</code> - A list of name-value pair that
+       * specify the desired quality of service settings for this event
+       * channel.
+       * @parm <code>initial_admin</code> - A list of name-value pair that
+       * specify the desired administrative settings for this event channel.
+       * @returns A new event channel object reference.
+       * @raises UnsupportedQoS If any of the settings in the
+       * <code>initial_qos</code> sequence could not be supported.
+       * @raises UnsupportedAdmin If any of the settings in the
+       * <code>initial_admin</code> sequence could not be supported.
+       */
+      EventChannel create_channel (
+	 in CosNotification::QoSProperties initial_qos,
+	 in CosNotification::AdminProperties initial_admin,
+	 out ChannelID id)
+	 raises(CosNotification::UnsupportedQoS,
+		CosNotification::UnsupportedAdmin );
+
+      /**
+       * Get all event channels created by this factory.
+       * @returns A sequence of channel object unique identifiers.
+       */
+      ChannelIDSeq get_all_channels();
+
+      /**
+       * Get an event channel object from its ID.
+       * @parm <code>id</code> - A unique identifier for the channel object.
+       * @returns An <code>EventChannel</code> object reference.
+       * @raises ChannelNotFound If no channel object with that ID
+       * could be found.
+       */
+      EventChannel get_event_channel ( in ChannelID id )
+	 raises (ChannelNotFound);
+
+   }; // EventChannelFactory
+
+}; // CosNotifyChannelAdmin
+
+#endif /* COSNOTIFYCHANNELADMIN_IDL */
