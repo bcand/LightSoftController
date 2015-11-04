@@ -44,7 +44,7 @@ INSTALLED_APPS = (
     #Raven for Sentry
     'raven.contrib.django.raven_compat',
     #My Installed Apps
-
+    'lightsoft_test',
 )
 
 MIDDLEWARE_CLASSES = (
