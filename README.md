@@ -12,3 +12,4 @@
 11. Run 'pip install django-filter'  # Filtering support
 12. Run 'pip install django-rest-swagger' #An API documentation generator for Swagger UI and Django REST Framework
 13. Run 'pip install raven --upgrade' # Logging with Sentry
+14. Run 'pip install django-redis' #Caching services

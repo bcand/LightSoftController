@@ -5,7 +5,7 @@ import CosNaming
 from IDL.globaldefs_idl import ProcessingFailureException
 from omniORB import CORBA
 
-from TMF814_MTNM_IIS_R4_0_IDL.IDL import aSAP__POA
+from corba_client.IDL import aSAP__POA
 
 
 class ASAPIterator_I_i(aSAP__POA.ASAPIterator_I):
