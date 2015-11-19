@@ -68,7 +68,7 @@ class commonTestCase(TestCase):
         print "Object reference is not an Common_I_i"
         sys.exit(1)
 
-     NamingAttributes()
+    # NamingAttributes()
     # logger.debug('ASAPIterator_I.next_n', exc_info=True, extra={'class': 'ASAPIterator_I',
     #                                                             'netxt_n': eo.next_n(10)})
     # logger.debug('Common_I.setNativeEMSName', exc_info=True, extra={'class': 'Common_I',

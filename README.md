@@ -13,3 +13,10 @@
 12. Run 'pip install django-rest-swagger' #An API documentation generator for Swagger UI and Django REST Framework
 13. Run 'pip install raven --upgrade' # Logging with Sentry
 14. Run 'pip install django-redis' #Caching services
+
+
+----OMNINAMES----
+run omniNames.sh located in base dir
+
+
+requirements.txt are only for use by travis

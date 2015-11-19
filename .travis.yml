@@ -1,0 +1,24 @@
+language: python
+python:
+  - "2.7"
+
+sudo: true
+
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --m$
+
+install:
+  #- sudo deb http://packages.linuxmint.com debian import
+  #- sudo apt-get -y  update
+  #- sudo apt-get install -y firefox
+  - pip install -r requirements.txt
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
+script:
+  - ./manage.py runserver &
+  - ./manage.py test
+

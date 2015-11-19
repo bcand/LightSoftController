@@ -1,0 +1,17 @@
+Django==1.8.3
+Markdown==2.6.4
+MarkupSafe==0.18
+PyYAML==3.10
+Pygments
+django-filter
+django-rest-swagger
+djangorestframework
+pyaml
+raven==5.7.2
+redis==2.10.5
+requests==2.8.1
+selenium
+Sphinx
+pep257
+pep8
+django-redis
