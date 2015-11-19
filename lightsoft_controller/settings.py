@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
     #My Installed Apps
     'lightsoft_test',
+    'rest_api'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,7 +116,8 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        # 'rest_framework.permissions.DjangoModelPermissions',
     ]
 }
 

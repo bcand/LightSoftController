@@ -18,4 +18,8 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+
+    #adding entry in order to route urls to rest_api app
+    url(r'^', include('rest_api.urls', namespace='rest_api')),
+
 ]

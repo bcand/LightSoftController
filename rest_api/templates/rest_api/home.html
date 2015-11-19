@@ -1,0 +1,12 @@
+
+{%  extends "rest_api/base.html" %}
+{%  load staticfiles %}
+{%  block main_body %}
+
+    {%  if greeting %}
+    <h2>{{ greeting }} </h2>
+    {% endif %}
+
+{#<a href="{% url 'rest_api:r' %}#}
+
+{% endblock %}
