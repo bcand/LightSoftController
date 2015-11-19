@@ -14,8 +14,11 @@ orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
 poa = orb.resolve_initial_references("RootPOA")
 
 # Obtain a reference to the root naming context
-obj = orb.resolve_initial_references("NameService")
+obj = orb.resolve_initial_references("LightSoftNameService")
 print orb.object_to_string(obj)
+obj1 = orb.resolve_initial_references("InterfaceRepository")
+print orb.object_to_string(obj1)
+
 rootContext = obj._narrow(CosNaming.NamingContext)
 
 if rootContext is None:
