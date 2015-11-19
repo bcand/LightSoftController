@@ -23,19 +23,32 @@ if rootContext is None:
     sys.exit(1)
 
 # Bind a context named "test.my_context" to the root context
-name = [CosNaming.NameComponent("LocalNameContext", "my_context")]
+name1 = [CosNaming.NameComponent("1stLocalNameContext", "1st_context")]
+name2 = [CosNaming.NameComponent("2ndLocalNameContext", "2nd_context")]
+
 try:
-    testContext = rootContext.bind_new_context(name)
-    print "New test context bound: %s" %name
+    testContext1 = rootContext.bind_new_context(name1)
+    print "New test context bound: %s" %name1
 
 except CosNaming.NamingContext.AlreadyBound, ex:
-    print "Test context already exists: %s" %name
-    obj = rootContext.resolve(name)
-    testContext = obj._narrow(CosNaming.NamingContext)
-    if testContext is None:
+    print "Test context already exists: %s" %name1
+    obj = rootContext.resolve(name1)
+    testContext1 = obj._narrow(CosNaming.NamingContext)
+    if testContext1 is None:
         print "test.mycontext exists but is not a NamingContext"
         sys.exit(1)
 
+try:
+    testContext2 = rootContext.bind_new_context(name2)
+    print "New test context bound: %s" %name2
+
+except CosNaming.NamingContext.AlreadyBound, ex:
+    print "Test context already exists: %s" %name2
+    obj = rootContext.resolve(name2)
+    testContext2 = obj._narrow(CosNaming.NamingContext)
+    if testContext2 is None:
+        print "test.mycontext exists but is not a NamingContext"
+        sys.exit(1)
 
 # aSAP
 
@@ -71,12 +84,12 @@ eo = ob._this()
 # Bind the ASAPIterator_I_i object to the test context
 name = [CosNaming.NameComponent("aSAP_ASAPIterator_I", "Object")]
 try:
-    testContext.bind(name, eo)
+    testContext1.bind(name, eo)
     # testContext = rootContext.bind_new_context(name)
     print "New aSAP \nASAPIterator_I object bound %s" %name
 
 except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
+    testContext1.rebind(name, eo)
     print "aSAP \nASAPIterator_I binding already existed -- rebound"
 
 
@@ -139,12 +152,12 @@ eo = ob._this()
 # Bind the ASAPIterator_I object to the test context
 name = [CosNaming.NameComponent("callSNC_CallAndTopLevelConnectionsIterator_I", "Object")]
 try:
-    testContext.bind(name, eo)
+    testContext1.bind(name, eo)
     # testContext = rootContext.bind_new_context(name)
     print "New callSNC \nCallAndTopLevelConnectionsIterator_I object bound %s" %name
 
 except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
+    testContext1.rebind(name, eo)
     print "callSNC \nCallAndTopLevelConnectionsIterator_I binding already existed -- rebound"
 
 # Create an instance of CallAndTopLevelConnectionsAndSNCsIterator_I and an CallAndTopLevelConnectionsAndSNCsIterator_I object reference
@@ -154,18 +167,16 @@ eo = ob._this()
 # Bind the ASAPIterator_I_i object to the test context
 name = [CosNaming.NameComponent("callSNC_CallAndTopLevelConnectionsAndSNCsIterator_I", "Object")]
 try:
-    testContext.bind(name, eo)
+    testContext1.bind(name, eo)
     # testContext = rootContext.bind_new_context(name)
     print "New callSNC \nCallAndTopLevelConnectionsAndSNCsIterator_I object bound %s" %name
 
 except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
+    testContext1.rebind(name, eo)
     print "callSNC \nCallAndTopLevelConnectionsAndSNCsIterator_I binding already existed -- rebound"
 
 
 #common
-class NamingAttributes_T_i(globaldefs_idl.NamingAttributes_T):
-    super
 
 class Common_I_i(common__POA.Common_I):
 
@@ -206,11 +217,11 @@ eo = ob._this()
 # Bind the Common_I object to the test context
 name = [CosNaming.NameComponent("common_Common_I", "Object")]
 try:
-    testContext.bind(name, eo)
+    testContext2.bind(name, eo)
     print "New common \nCommon_I object bound %s" %name
 
 except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
+    testContext1.rebind(name, eo)
     print "common \nCommon_I binding already existed -- rebound"
 
 
