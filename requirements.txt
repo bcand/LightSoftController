@@ -15,3 +15,4 @@ Sphinx
 pep257
 pep8
 django-redis
+marshmallow
