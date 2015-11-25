@@ -6,6 +6,7 @@ import omniORB
 omniORB.updateModule("session")
 
 # ** 1. Stub files contributing to this module
+import session_idl
 
 # ** 2. Sub-modules
 

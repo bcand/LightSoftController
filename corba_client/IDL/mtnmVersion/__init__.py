@@ -6,6 +6,7 @@ import omniORB
 omniORB.updateModule("mtnmVersion")
 
 # ** 1. Stub files contributing to this module
+import mtnmVersion_idl
 
 # ** 2. Sub-modules
 

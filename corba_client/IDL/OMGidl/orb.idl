@@ -37,9 +37,9 @@
 
 module CORBA
 {
-//    interface Principal { };  # had to comment
+//    interface Principal { }; # had to comment
     interface NamedValue { };
-//    interface TypeCode { };   # had to comment
+//    interface TypeCode { }; # had to comment
 };
 
 #endif

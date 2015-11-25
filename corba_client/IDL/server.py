@@ -16,14 +16,16 @@ poa = orb.resolve_initial_references("RootPOA")
 # Obtain a reference to the root naming context
 obj = orb.resolve_initial_references("LightSoftNameService")
 print orb.object_to_string(obj)
-obj1 = orb.resolve_initial_references("InterfaceRepository")
-print orb.object_to_string(obj1)
 
 rootContext = obj._narrow(CosNaming.NamingContext)
 
 if rootContext is None:
     print "Failed to narrow the root naming context"
     sys.exit(1)
+
+# name = [CosNaming.NameComponent("1LightSoftNameService", "ORG")]
+# obj = rootContext.bind_new_context(name)
+print orb.object_to_string(obj)
 
 # Bind a context named "test.my_context" to the root context
 name1 = [CosNaming.NameComponent("1stLocalNameContext", "1st_context")]
@@ -199,19 +201,19 @@ class Common_I_i(common__POA.Common_I):
 
     # in globaldefs::NamingAttributes_T objectName,
     # in string owner)
-    def setOwner(self, objectName, owner):
-       print 'objectName: ',objectName
-       print 'owner: ',owner
+    def setOwner(self, object_name, owner):
+        print 'objectName: ',object_name
+        print 'owner: ',owner
 
     # out CapabilityList_T capabilities)
     def getCapabilities(self):
-       return common_idl.CapabilityList_T('capability1')
+        return common_idl.CapabilityList_T('capability1')
 
     # in globaldefs::NamingAttributes_T objectName,
     # inout globaldefs::NVSList_T additionalInfo)
     def setAdditionalInfo(self, objectName):
-       print 'objectName: ',objectName
-       return globaldefs_idl.NVSList_T('NVSList1')
+        print 'objectName: ',objectName
+        return globaldefs_idl.NVSList_T('NVSList1')
 
 # Create an instance of Common_I and an Common_I object reference
 ob = Common_I_i()
