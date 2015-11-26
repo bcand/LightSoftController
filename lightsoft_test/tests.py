@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class aSAPTestCase(TestCase):
-    client = Client(None, "LightSoftNameService")
+    client = Client(None, "NameService")
     obj = client.get_resolved_object("Local_Context", "my_context", "ASAPIterator_I", "Object")
     print 'getLength: ', obj.getLength()
     client = None
@@ -39,7 +39,7 @@ class aSAPTestCase(TestCase):
 
 
 class callSNCTestCase(TestCase):
-    client = Client(None, "LightSoftNameService")
+    client = Client(None, "NameService")
     obj = client.get_resolved_object("Local_Context", "my_context", "CallAndTopLevelConnectionsIterator_I", "Object")
     print 'getLength: ', obj.getLength()
     client = None
@@ -51,7 +51,7 @@ class callSNCTestCase(TestCase):
 
 
 class commonTestCase(TestCase):
-    client = Client(None, "LightSoftNameService")
+    client = Client(None, "NameService")
     obj = client.get_resolved_object("Local_Context", "my_context", "Common_I", "Object")
     print 'setOwner: ', obj.setOwner()
 

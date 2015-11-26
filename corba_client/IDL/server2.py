@@ -14,7 +14,7 @@ orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
 poa = orb.resolve_initial_references("RootPOA")
 
 # Obtain a reference to the root naming context
-obj = orb.resolve_initial_references("LightSoftNameService")
+obj = orb.resolve_initial_references("NameService")
 print orb.object_to_string(obj)
 
 rootContext = obj._narrow(CosNaming.NamingContext)
@@ -197,3 +197,4 @@ poaManager.activate()
 
 # Block for ever (or until the ORB is shut down)
 orb.run()
+print 'Server is up'
