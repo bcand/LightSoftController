@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("performance__POA")
 
 # ** 1. Stub files contributing to this module
-import performance_idl
+from corba_client.IDL import performance_idl
 
 # ** 2. Sub-modules
 

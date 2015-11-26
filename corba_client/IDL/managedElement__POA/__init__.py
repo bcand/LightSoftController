@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("managedElement__POA")
 
 # ** 1. Stub files contributing to this module
-import managedElement_idl
+from corba_client.IDL import managedElement_idl
 
 # ** 2. Sub-modules
 

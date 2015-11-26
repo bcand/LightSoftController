@@ -8,7 +8,7 @@ import aSAP__POA
 import callSNC__POA
 import common__POA
 import globaldefs_idl
-from corba_client.IDL import common_idl
+import common_idl
 
 orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
 poa = orb.resolve_initial_references("RootPOA")
@@ -38,9 +38,28 @@ if testContext is None:
         print "test.mycontext exists but is not a NamingContext"
         sys.exit(1)
 
+
+def bind_in_context(object, object_name, object_type, context):
+    # Create an instance of the object and an object reference
+    ob = object
+    eo = ob._this()
+    print 'Object', obj
+
+    # Bind the object to the test context
+    name = [CosNaming.NameComponent(object_name, object_type)]
+    try:
+        context.bind(name, eo)
+        print "New ", name, "object bound "
+
+    except CosNaming.NamingContext.AlreadyBound:
+        context.rebind(name, eo)
+        print name, " binding already existed -- rebound"
+
+
 # aSAP
 
-class ASAPIterator_I_i(aSAP__POA.ASAPIterator_I):
+
+class ASAPIterator_I_impl(aSAP__POA.ASAPIterator_I):
 
     def next_n(self, how_many, aSAPList):
         try:
@@ -64,26 +83,13 @@ class ASAPIterator_I_i(aSAP__POA.ASAPIterator_I):
             print 'destroy called'
         except globaldefs_idl.ProcessingFailureException, ex:
             print ex
-
-# Create an instance of ASAPIterator_I_i and an Echo object reference
-ob = ASAPIterator_I_i()
-eo = ob._this()
-
-# Bind the ASAPIterator_I_i object to the test context
-name = [CosNaming.NameComponent("aSAP_ASAPIterator_I", "Object")]
-try:
-    testContext.bind(name, eo)
-    # testContext = rootContext.bind_new_context(name)
-    print "New aSAP \nASAPIterator_I object bound %s" %name
-
-except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
-    print "aSAP \nASAPIterator_I binding already existed -- rebound"
-
+obj = ASAPIterator_I_impl()
+bind_in_context(obj, "ASAPIterator_I",
+                 "Object", testContext)
 
 # callSNC
 
-class CallAndTopLevelConnectionsIterator_I_i(callSNC__POA.CallAndTopLevelConnectionsIterator_I):
+class CallAndTopLevelConnectionsIterator_I_impl(callSNC__POA.CallAndTopLevelConnectionsIterator_I):
 
     def next_n(self, how_many, aSAPList):
         try:
@@ -108,7 +114,7 @@ class CallAndTopLevelConnectionsIterator_I_i(callSNC__POA.CallAndTopLevelConnect
         except globaldefs_idl.ProcessingFailureException, ex:
             print ex
 
-class CallAndTopLevelConnectionsAndSNCsIterator_I_i(callSNC__POA.CallAndTopLevelConnectionsAndSNCsIterator_I):
+class CallAndTopLevelConnectionsAndSNCsIterator_I_impl(callSNC__POA.CallAndTopLevelConnectionsAndSNCsIterator_I):
 
     def next_n(self, how_many, aSAPList):
         try:
@@ -132,41 +138,18 @@ class CallAndTopLevelConnectionsAndSNCsIterator_I_i(callSNC__POA.CallAndTopLevel
             print 'destroy called'
         except globaldefs_idl.ProcessingFailureException, ex:
             print ex
-
-# Create an instance of CallAndTopLevelConnectionsIterator_I and an CallAndTopLevelConnectionsIterator_I object reference
-ob = CallAndTopLevelConnectionsAndSNCsIterator_I_i()
-eo = ob._this()
-
-# Bind the ASAPIterator_I object to the test context
-name = [CosNaming.NameComponent("callSNC_CallAndTopLevelConnectionsIterator_I", "Object")]
-try:
-    testContext.bind(name, eo)
-    # testContext = rootContext.bind_new_context(name)
-    print "New callSNC \nCallAndTopLevelConnectionsIterator_I object bound %s" %name
-
-except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
-    print "callSNC \nCallAndTopLevelConnectionsIterator_I binding already existed -- rebound"
-
-# Create an instance of CallAndTopLevelConnectionsAndSNCsIterator_I and an CallAndTopLevelConnectionsAndSNCsIterator_I object reference
-ob = CallAndTopLevelConnectionsAndSNCsIterator_I_i()
-eo = ob._this()
-
-# Bind the ASAPIterator_I_i object to the test context
-name = [CosNaming.NameComponent("callSNC_CallAndTopLevelConnectionsAndSNCsIterator_I", "Object")]
-try:
-    testContext.bind(name, eo)
-    # testContext = rootContext.bind_new_context(name)
-    print "New callSNC \nCallAndTopLevelConnectionsAndSNCsIterator_I object bound %s" %name
-
-except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
-    print "callSNC \nCallAndTopLevelConnectionsAndSNCsIterator_I binding already existed -- rebound"
+obj = CallAndTopLevelConnectionsAndSNCsIterator_I_impl()
+bind_in_context(obj,
+                 "CallAndTopLevelConnectionsIterator_I", "Object", testContext)
+obj = CallAndTopLevelConnectionsAndSNCsIterator_I_impl()
+bind_in_context(obj,
+                 "CallAndTopLevelConnectionsAndSNCsIterator_I", "Object", testContext)
 
 
-#common
+# common
 
-class Common_I_i(common__POA.Common_I):
+
+class Common_I_impl(common__POA.Common_I):
 
     # in globaldefs::NamingAttributes_T objectName,
     # in string nativeEMSName)
@@ -180,13 +163,16 @@ class Common_I_i(common__POA.Common_I):
     def setUserLabel (self, objectName, userLabel, enforceUniqueness):
         print 'objectName: ', objectName
         print 'userLabel: ', userLabel
-        print 'enforceUniqueness: ',enforceUniqueness
+        print 'enforceUniqueness: ', enforceUniqueness
 
     # in globaldefs::NamingAttributes_T objectName,
     # in string owner)
     def setOwner(self, object_name, owner):
-        print 'objectName: ',object_name
-        print 'owner: ',owner
+        try:
+            print 'objectName: ', object_name
+            print 'owner: ', owner
+        except globaldefs_idl.ProcessingFailureException, ex:
+            print ex
 
     # out CapabilityList_T capabilities)
     def getCapabilities(self):
@@ -195,22 +181,14 @@ class Common_I_i(common__POA.Common_I):
     # in globaldefs::NamingAttributes_T objectName,
     # inout globaldefs::NVSList_T additionalInfo)
     def setAdditionalInfo(self, objectName):
-        print 'objectName: ',objectName
+        print 'objectName: ', objectName
         return globaldefs_idl.NVSList_T('NVSList1')
 
-# Create an instance of Common_I and an Common_I object reference
-ob = Common_I_i()
-eo = ob._this()
+obj = Common_I_impl()
+bind_in_context(obj, "Common_I",
+                 "Object", testContext)
 
-# Bind the Common_I object to the test context
-name = [CosNaming.NameComponent("common_Common_I", "Object")]
-try:
-    testContext.bind(name, eo)
-    print "New common \nCommon_I object bound %s" %name
 
-except CosNaming.NamingContext.AlreadyBound:
-    testContext.rebind(name, eo)
-    print "common \nCommon_I binding already existed -- rebound"
 
 
 # Activate the POA

@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("nmsSession__POA")
 
 # ** 1. Stub files contributing to this module
-import nmsSession_idl
+from corba_client.IDL import nmsSession_idl
 
 # ** 2. Sub-modules
 

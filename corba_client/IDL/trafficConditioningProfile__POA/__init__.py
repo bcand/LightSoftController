@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("trafficConditioningProfile__POA")
 
 # ** 1. Stub files contributing to this module
-import trafficConditioningProfile_idl
+from corba_client.IDL import trafficConditioningProfile_idl
 
 # ** 2. Sub-modules
 

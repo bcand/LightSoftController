@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("guiCutThrough__POA")
 
 # ** 1. Stub files contributing to this module
-import guiCutThrough_idl
+from corba_client.IDL import guiCutThrough_idl
 
 # ** 2. Sub-modules
 

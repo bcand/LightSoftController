@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("subnetworkConnection__POA")
 
 # ** 1. Stub files contributing to this module
-import subnetworkConnection_idl
+from corba_client.IDL import subnetworkConnection_idl
 
 # ** 2. Sub-modules
 

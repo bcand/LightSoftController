@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("aSAP")
 
 # ** 1. Stub files contributing to this module
-import aSAP_idl
+from corba_client.IDL import aSAP_idl
 
 # ** 2. Sub-modules
 

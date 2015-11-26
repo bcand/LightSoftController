@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("mLSNPP")
 
 # ** 1. Stub files contributing to this module
-import mLSNPP_idl
+from corba_client.IDL import mLSNPP_idl
 
 # ** 2. Sub-modules
 

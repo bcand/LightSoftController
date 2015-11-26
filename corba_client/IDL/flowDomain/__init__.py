@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("flowDomain")
 
 # ** 1. Stub files contributing to this module
-import flowDomain_idl
+from corba_client.IDL import flowDomain_idl
 
 # ** 2. Sub-modules
 

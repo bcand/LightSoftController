@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("softwareAndDataManager__POA")
 
 # ** 1. Stub files contributing to this module
-import softwareAndDataManager_idl
+from corba_client.IDL import softwareAndDataManager_idl
 
 # ** 2. Sub-modules
 

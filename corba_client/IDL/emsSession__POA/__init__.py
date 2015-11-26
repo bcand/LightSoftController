@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("emsSession__POA")
 
 # ** 1. Stub files contributing to this module
-import emsSession_idl
+from corba_client.IDL import emsSession_idl
 
 # ** 2. Sub-modules
 

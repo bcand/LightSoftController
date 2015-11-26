@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("transmissionParameters")
 
 # ** 1. Stub files contributing to this module
-import transmissionParameters_idl
+from corba_client.IDL import transmissionParameters_idl
 
 # ** 2. Sub-modules
 

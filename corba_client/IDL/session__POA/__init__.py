@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("session__POA")
 
 # ** 1. Stub files contributing to this module
-import session_idl
+from corba_client.IDL import session_idl
 
 # ** 2. Sub-modules
 

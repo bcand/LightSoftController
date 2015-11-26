@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("emsSessionFactory")
 
 # ** 1. Stub files contributing to this module
-import emsSessionFactory_idl
+from corba_client.IDL import emsSessionFactory_idl
 
 # ** 2. Sub-modules
 

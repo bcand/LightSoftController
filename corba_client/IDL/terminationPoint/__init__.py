@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("terminationPoint")
 
 # ** 1. Stub files contributing to this module
-import terminationPoint_idl
+from corba_client.IDL import terminationPoint_idl
 
 # ** 2. Sub-modules
 

@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("multiLayerSubnetwork")
 
 # ** 1. Stub files contributing to this module
-import multiLayerSubnetwork_idl
+from corba_client.IDL import multiLayerSubnetwork_idl
 
 # ** 2. Sub-modules
 

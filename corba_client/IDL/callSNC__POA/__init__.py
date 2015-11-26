@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("callSNC__POA")
 
 # ** 1. Stub files contributing to this module
-import callSNC_idl
+from corba_client.IDL import callSNC_idl
 
 # ** 2. Sub-modules
 

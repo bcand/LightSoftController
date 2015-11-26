@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("common__POA")
 
 # ** 1. Stub files contributing to this module
-import common_idl
+from corba_client.IDL import common_idl
 
 # ** 2. Sub-modules
 

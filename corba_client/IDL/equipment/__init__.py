@@ -6,7 +6,7 @@ import omniORB
 omniORB.updateModule("equipment")
 
 # ** 1. Stub files contributing to this module
-import equipment_idl
+from corba_client.IDL import equipment_idl
 
 # ** 2. Sub-modules
 
