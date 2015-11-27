@@ -6,8 +6,8 @@ import omniORB
 omniORB.updateModule("aSAP__POA")
 
 # ** 1. Stub files contributing to this module
-from corba_client.IDL import aSAP_idl
-
+import aSAP_idl
+#from corba_client.IDL
 # ** 2. Sub-modules
 
 # ** 3. End
