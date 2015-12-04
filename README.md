@@ -15,6 +15,9 @@
 14. Run 'pip install django-redis' #Caching services
 
 
+
+
+
 ----OMNINAMES----
 run omniNames.sh located in base dir
 
