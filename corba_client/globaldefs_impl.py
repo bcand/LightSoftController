@@ -43,9 +43,10 @@ omniORB.registerType(NameAndStringValue_T._NP_RepositoryId, _0_globaldefs._d_Nam
 class NVSList_T:
     _NP_RepositoryId = "IDL:mtnm.tmforum.org/globaldefs/NVSList_T:1.0"
     def __init__(self, *args, **kw):
+        self = []
         for count, thing in enumerate(args):
-            print '{0}. {1}'.format(count, thing)
-        # self.list = [ ]
+            print '{0}'.format(thing)
+            self.append(thing)
 _0_globaldefs.NVSList_T = NVSList_T
 _0_globaldefs._d_NVSList_T  = (omniORB.tcInternal.tv_sequence, omniORB.typeMapping["IDL:mtnm.tmforum.org/globaldefs/NameAndStringValue_T:1.0"], 0)
 _0_globaldefs._ad_NVSList_T = (omniORB.tcInternal.tv_alias, NVSList_T._NP_RepositoryId, "NVSList_T", (omniORB.tcInternal.tv_sequence, omniORB.typeMapping["IDL:mtnm.tmforum.org/globaldefs/NameAndStringValue_T:1.0"], 0))
@@ -56,13 +57,15 @@ omniORB.registerType(NVSList_T._NP_RepositoryId, _0_globaldefs._ad_NVSList_T, _0
 class NamingAttributes_T:
     _NP_RepositoryId = "IDL:mtnm.tmforum.org/globaldefs/NamingAttributes_T:1.0"
     def __init__(self, *args, **kw):
-        raise RuntimeError("Cannot construct objects of this type.")
+        if args:
+
+            self = args
+
 _0_globaldefs.NamingAttributes_T = NamingAttributes_T
 _0_globaldefs._d_NamingAttributes_T  = omniORB.typeMapping["IDL:mtnm.tmforum.org/globaldefs/NVSList_T:1.0"]
 _0_globaldefs._ad_NamingAttributes_T = (omniORB.tcInternal.tv_alias, NamingAttributes_T._NP_RepositoryId, "NamingAttributes_T", omniORB.typeCodeMapping["IDL:mtnm.tmforum.org/globaldefs/NVSList_T:1.0"]._d)
 _0_globaldefs._tc_NamingAttributes_T = omniORB.tcInternal.createTypeCode(_0_globaldefs._ad_NamingAttributes_T)
 omniORB.registerType(NamingAttributes_T._NP_RepositoryId, _0_globaldefs._ad_NamingAttributes_T, _0_globaldefs._tc_NamingAttributes_T)
-del NamingAttributes_T
 
 # typedef ... NamingAttributesList_T
 class NamingAttributesList_T:

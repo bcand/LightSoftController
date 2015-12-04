@@ -4,7 +4,7 @@ import sys
 from django.test import TestCase
 from raven.contrib.django.raven_compat.models import logging
 
-# from corba_client.IDL import globaldefs
+from corba_client.globaldefs_impl import NameAndStringValue_T, NVSList_T, NamingAttributes_T
 # from corba_client.globaldefs_impl import  NameAndStringValue_T
 from corba_client.client import Client
 # from corba_client.IDL import globaldefs
@@ -66,14 +66,16 @@ class callSNCTestCase(TestCase):
 class commonTestCase(TestCase):
     client = Client(None, "NameService")
     obj = client.get_resolved_object("Local_Context", "my_context", "Common_I", "Object")
-    # nsv = NameAndStringValue_T('lala', 'kaka')
-
+    nsv1 = NameAndStringValue_T('lala', 'kaka')
+    nsv2 = NameAndStringValue_T('pop', 'lock')
     # nsv = globaldefs.NameAndStringValue_T('lala', 'kaka')
     # print nsv
 
     # nsvl = [[ ('lala', 'kaka']]
-
-    print 'setOwner: ', obj.setOwner(nsvl, 'bcand')
+    nsvl = NVSList_T(nsv1, nsv2)
+    na = NamingAttributes_T()
+    na = nsvl
+    print 'setOwner: ', obj.setOwner(na, 'bcand')
     print 'lala: ',obj
     # eo.setOwner("lala", "bcand")
 
