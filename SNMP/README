@@ -1,0 +1,7 @@
+http://wiki.linuxservertech.com/index.php?action=artikel&cat=9&id=167&artlang=en
+follow these instructions to setup client and server
+Keep in mind that client has to also install snmp packet as well as the ones suggested
+Server needs to install snmp and snmp-mibs-downloader
+In case of Debian not finding the packets there is one:
+wget and then install(dpkg -i)
+https://packages.debian.org/squeeze/all/snmp-mibs-downloader/download
