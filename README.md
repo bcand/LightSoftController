@@ -13,6 +13,7 @@
 12. Run 'pip install django-rest-swagger' #An API documentation generator for Swagger UI and Django REST Framework
 13. Run 'pip install raven --upgrade' # Logging with Sentry
 14. Run 'pip install django-redis' #Caching services
+15. Run 'pip install marshmallow'
 
 
 
@@ -22,4 +23,16 @@
 run omniNames.sh located in base dir
 
 
-requirements.txt are only for use by travis
+----ISSUES---
+1.order.json contains at the body a list of items where one of them is different than the other. For example item1 has
+no attribute parentItemId while item2 does. So now we have to delete the extra parentItemId when serializing.
+This value defaults to empty
+
+2. No account is present in this order, so we have no way to know its description
+
+
+
+
+
+
+
